@@ -1,0 +1,23 @@
+version: '3'
+services:
+  projeto:
+    container_name: projeto
+    image: pw1/projeto
+    build: ./database
+    ports: 
+     - "5433:5432" 
+  app:
+    container_name: app
+    image: pw1/app
+    build: 
+      context: ../
+      dockerfile: ./env/app/Dockerfile
+    ports: 
+     - "4444:4444"
+    environment:
+      DATABASE_URL: postgresql://postgis:postgis@projeto:5432/estacionaAqui
+    depends_on:
+      - projeto
+    deploy:
+      restart_policy:
+        condition: on-failure
