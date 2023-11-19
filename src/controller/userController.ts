@@ -16,7 +16,9 @@ export class UserController {
 			})
 			res.status(201).json(result)
 		} catch (error: unknown) {
+			console.log(error)
 			res.status(400).json({ error: 'something went wrong' })
+
 		}
 	}
 }
