@@ -10,8 +10,8 @@ type Params ={
 }
 
 type ParamsUpdate = {
-	email: string;
-  phoneNumber: string;
+	email?: string;
+  phoneNumber?: string;
 	id: string
 }
 
@@ -62,5 +62,14 @@ export class UserService{
 			console.log(err)
 			throw new Error()
 		}
+	}
+	async delete({id} : ParamsUpdate){
+		const deletedUser = await prisma.user.delete({
+			where: {
+				id
+			},
+		})
+		
+		return deletedUser
 	}
 }

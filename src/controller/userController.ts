@@ -25,8 +25,6 @@ export class UserController {
 		const userId = req.params.userId
 		const  id  = req.params.id
 		if(userId != id){
-			console.log(userId)
-			console.log(id)
 			return res.status(403).json('erro')
 		}
 		const {email, phoneNumber} = req.body
@@ -38,4 +36,14 @@ export class UserController {
 			res.status(400).json({ error: 'something went wrong' })
 		}
 	}
+	async delete(req: Request, res: Response){
+		const userId = req.params.userId
+		const  id  = req.params.id
+		if(userId != id){
+			return res.status(403).json('erro')
+		}
+		const result = await userService.delete({ id })
+		res.status(200).json(result)
+	}
 }
+
