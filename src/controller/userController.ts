@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { UserService } from '../service/userService'
+import { banToken } from '../utils/cache'
 
 const userService = new UserService()
 
@@ -43,6 +44,7 @@ export class UserController {
 			return res.status(403).json('erro')
 		}
 		const result = await userService.delete({ id })
+		await banToken(req.headers['authorization'])
 		res.status(200).json(result)
 	}
 }

@@ -1,6 +1,7 @@
 import {Request,Response,NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import DotEnv from 'dotenv'
+import { isBan } from '../utils/cache'
 
 DotEnv.config()
 
@@ -16,6 +17,10 @@ export async function checkLogin(
 		return res.status(401).json({ message: 'Token not sent.' })
 	}
 	try{
+		const isBanned = await isBan(token)
+		if(isBanned){
+			throw new Error()
+		}
 		const result = jwt.verify(token.toString(), SECRET)
 		req.params.userId = result.id
 	}catch(error: unknown){
