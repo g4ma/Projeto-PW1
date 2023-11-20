@@ -21,4 +21,21 @@ export class UserController {
 
 		}
 	}
+	async update(req: Request, res: Response){
+		const userId = req.params.userId
+		const  id  = req.params.id
+		if(userId != id){
+			console.log(userId)
+			console.log(id)
+			return res.status(403).json('erro')
+		}
+		const {email, phoneNumber} = req.body
+		try{
+			const result = userService.update({email, phoneNumber, id})
+			res.status(201).json(result)
+		}catch (error: unknown) {
+			console.log(error)
+			res.status(400).json({ error: 'something went wrong' })
+		}
+	}
 }

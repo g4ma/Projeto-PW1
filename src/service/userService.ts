@@ -9,6 +9,12 @@ type Params ={
   pixKey?: string
 }
 
+type ParamsUpdate = {
+	email: string;
+  phoneNumber: string;
+	id: string
+}
+
 export class UserService{
 	async create ({name, email, phoneNumber, password, pixKey}:Params){
 		const user = await prisma.user.findUnique({
@@ -39,5 +45,22 @@ export class UserService{
 			return {...userNew, pixKey}
 		}
 		return userNew
+	}
+	async update({email, phoneNumber, id}: ParamsUpdate){
+		try{
+			const userUpdate = prisma.user.update({
+				where:{
+					id
+				},
+				data:{
+					email,
+					phoneNumber
+				}
+			})
+			return userUpdate
+		}catch (err) {
+			console.log(err)
+			throw new Error()
+		}
 	}
 }
