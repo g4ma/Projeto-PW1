@@ -27,7 +27,7 @@ class AuthService{
 			})
 			return {token: token}
 		}
-		throw new Error('Usuário com email e senha informados não existe')
+		throw new Error('User with email and password provided does not exist')
 	}
 
 }
