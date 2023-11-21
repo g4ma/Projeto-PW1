@@ -69,7 +69,26 @@ export class UserService{
 				id
 			},
 		})
-		
+
 		return deletedUser
+	}
+	async detail({id}: ParamsUpdate){
+		if(!id){
+			throw new Error('Invalid id')
+		}
+		const detailedUser = await prisma.user.findUnique({
+			where:{
+				id
+			}
+		})
+		const detailedOwner = await prisma.owner.findUnique({
+			where:{
+				userId: id
+			}
+		})
+		if(detailedOwner){
+			return {...detailedUser, pixKey:detailedOwner.pixKey}
+		}
+		return detailedUser
 	}
 }

@@ -8,6 +8,7 @@ const userController = new UserController()
 routesUser.post('/users',userController.create)
 routesUser.patch('/users/:id',checkLogin, userController.update)
 routesUser.delete('/users/:id',checkLogin, userController.delete)
+routesUser.get('/users/:id', checkLogin, userController.detail)
 
 
 export default routesUser
