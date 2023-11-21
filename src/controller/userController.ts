@@ -59,7 +59,22 @@ export class UserController {
 			console.log(error)
 			res.status(400).json({ error: 'something went wrong' })
 		}
-		
+	}
+	async upgrade(req: Request, res: Response){
+		const userId = req.params.userId
+		const  id  = req.params.id
+		const {pixKey} = req.body
+		if(userId != id){
+			return res.status(403).json('erro')
+		}
+		try{
+			const result = await userService.upgrade({id, pixKey})
+			res.status(200).json(result)
+		}catch(error: unknown){
+			console.log(error)
+			res.status(400).json({ error: 'something went wrong' })
+		}
 	}
 }
+
 

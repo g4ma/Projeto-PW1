@@ -12,7 +12,8 @@ type Params ={
 type ParamsUpdate = {
 	email?: string;
   phoneNumber?: string;
-	id: string
+	id: string;
+	pixKey?:string
 }
 
 export class UserService{
@@ -90,5 +91,18 @@ export class UserService{
 			return {...detailedUser, pixKey:detailedOwner.pixKey}
 		}
 		return detailedUser
+	}
+	async upgrade({id, pixKey}: ParamsUpdate){
+		if(!id || !pixKey){
+			throw new Error('Invalid data')
+		} 
+		
+		const upgradedUser = await prisma.owner.create({
+			data:{
+				userId: id,
+				pixKey
+			},
+		})
+		return upgradedUser
 	}
 }
