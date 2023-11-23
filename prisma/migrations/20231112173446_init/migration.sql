@@ -57,3 +57,5 @@ ALTER TABLE "Reservation" ADD CONSTRAINT "Reservation_parkingSpaceId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "Reservation" ADD CONSTRAINT "Reservation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
