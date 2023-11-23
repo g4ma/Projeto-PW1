@@ -15,9 +15,9 @@ datasource db {
 model User {
   id          String @id @default(uuid()) @db.VarChar(36)
   name        String @db.VarChar(80)
-  email       String @db.VarChar(256)
+  email       String @unique @db.VarChar(256)
   phoneNumber String @db.VarChar(16)
-  password    String @db.VarChar(16)
+  password    String @db.VarChar(255)
 
   Owner       Owner?
   Reservation Reservation[]
