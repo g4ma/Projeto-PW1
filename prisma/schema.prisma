@@ -32,12 +32,14 @@ model Owner {
 }
 
 model ParkingSpace {
-  id            String @id @default(uuid()) @db.VarChar(36)
-  picture       String @db.VarChar(100)
-  location      String // geometry
+  id            String           @id @default(uuid()) @db.VarChar(36)
+  picture       String           @db.VarChar(100)
+  locationLat   Float
+  locationLng   Float
   pricePerHour  Float
-  disponibility String @db.VarChar(50)
-  description   String @db.VarChar(50)
+  disponibility String           @db.VarChar(50)
+  description   String           @db.VarChar(50)
+  type          ParkingSpaceType
 
   ownerId String @db.VarChar(36)
   owner   Owner  @relation(fields: [ownerId], references: [userId])
@@ -56,4 +58,9 @@ model Reservation {
 
   parkingSpace ParkingSpace @relation(fields: [parkingSpaceId], references: [id])
   user         User         @relation(fields: [userId], references: [id])
+}
+
+enum ParkingSpaceType {
+  Moto
+  Carro
 }
