@@ -16,6 +16,14 @@ type Params = {
     ownerId: string
 }
 
+type ParamsUpdate = {
+	id: string
+	userId: string
+	disponibility?: string
+	description?: string
+	pricePerHour?: number
+}
+
 export class ParkingSpaceService{
 
 	async create({picture, latitude, longitude, pricePerHour, disponibility, description, type, ownerId}: Params){
@@ -63,4 +71,49 @@ export class ParkingSpaceService{
 			throw error
 		}
 	}
+
+	async update({id, userId, disponibility, description, pricePerHour}: ParamsUpdate){
+		try{
+			const owner = await prisma.owner.findUnique({
+				where: {
+					userId
+				}
+			})
+
+			if(!owner){
+				throw new Error("user is not owner type")
+			}
+
+
+			const parkingSpace = await prisma.parkingSpace.findUnique({
+				where: {
+					id,
+					ownerId: owner.userId
+				}
+			})
+
+			if(!parkingSpace){
+				throw new Error("parking space doens't exists")
+			}
+
+
+			const parkingSpaceUpdated = await prisma.parkingSpace.update({
+				where: {
+					id
+				},
+				data: {
+					disponibility: disponibility ?? parkingSpace.disponibility,
+					description: description ?? parkingSpace.description,
+					pricePerHour: pricePerHour ?? parkingSpace.pricePerHour,
+				}
+			})
+
+
+			return parkingSpaceUpdated
+		} catch(error){
+			console.error(error)
+			throw error
+		}
+	}
+
 }

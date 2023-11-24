@@ -37,7 +37,7 @@ model ParkingSpace {
   latitude      Float
   longitude     Float
   pricePerHour  Float
-  disponibility String           @db.VarChar(50)
+  disponibility Boolean          @default(false)
   description   String           @db.VarChar(50)
   type          ParkingSpaceType
 
@@ -48,13 +48,13 @@ model ParkingSpace {
 }
 
 model Reservation {
-  id             String @id @default(uuid()) @db.VarChar(36)
-  userId         String @db.VarChar(36)
-  parkingSpaceId String @db.VarChar(36)
+  id             String                   @id @default(uuid()) @db.VarChar(36)
+  userId         String                   @db.VarChar(36)
+  parkingSpaceId String                   @db.VarChar(36)
   startTime      String
   endTime        String
   date           String
-  paymentStatus  String @db.VarChar(20)
+  paymentStatus  ReservationPaymentStatus @default(Pendente)
 
   parkingSpace ParkingSpace @relation(fields: [parkingSpaceId], references: [id])
   user         User         @relation(fields: [userId], references: [id])
@@ -63,4 +63,10 @@ model Reservation {
 enum ParkingSpaceType {
   Moto
   Carro
+}
+
+enum ReservationPaymentStatus {
+  Cancelado
+  Aprovado
+  Pendente
 }

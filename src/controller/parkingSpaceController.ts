@@ -35,4 +35,17 @@ export class ParkingSpaceController{
 		}
 	}
 
+	async update(req: Request, res: Response){
+		const { id } = req.params
+		const userId = req.params.userId
+
+		const { description, pricePerHour, disponibility } = req.body
+		try{
+			const parkingSpace = await parkingSpaceService.update({id, userId, disponibility, description, pricePerHour})
+			return res.status(200).json({ parkingSpace })
+		} catch(error){
+			return res.status(404).json({ error: error.message})
+		}
+	}
+
 }
