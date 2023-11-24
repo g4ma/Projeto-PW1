@@ -1,13 +1,14 @@
 import { Router } from "express"
 import { ParkingSpaceController } from "../controller/parkingSpaceController"
+import { checkLogin } from "../middlewares/checkLogin"
 
 const parkingSpaceRoutes = Router()
 const parkingSpaceController = new ParkingSpaceController()
 
-parkingSpaceRoutes.post("/parkingSpaces", parkingSpaceController.create)
-parkingSpaceRoutes.get("/parkingSpaces/:id", parkingSpaceController.detail)
-parkingSpaceRoutes.get("/parkingSpaces", parkingSpaceController.listAll)
-parkingSpaceRoutes.patch("/parkingSpaces/:id", parkingSpaceController.update)
-parkingSpaceRoutes.delete("/parkingSpaces/:id", parkingSpaceController.delete)
+parkingSpaceRoutes.post("/parkingSpaces", checkLogin, parkingSpaceController.create)
+parkingSpaceRoutes.get("/parkingSpaces/:id", checkLogin, parkingSpaceController.detail)
+parkingSpaceRoutes.get("/parkingSpaces", checkLogin, parkingSpaceController.listAll)
+parkingSpaceRoutes.patch("/parkingSpaces/:id", checkLogin, parkingSpaceController.update)
+parkingSpaceRoutes.delete("/parkingSpaces/:id", checkLogin, parkingSpaceController.delete)
 
 export default parkingSpaceRoutes
