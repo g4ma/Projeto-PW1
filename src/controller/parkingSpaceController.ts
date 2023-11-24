@@ -42,9 +42,20 @@ export class ParkingSpaceController{
 		const { description, pricePerHour, disponibility } = req.body
 		try{
 			const parkingSpace = await parkingSpaceService.update({id, userId, disponibility, description, pricePerHour})
-			return res.status(200).json({ parkingSpace })
+			return res.status(200).json(parkingSpace)
 		} catch(error){
-			return res.status(404).json({ error: error.message})
+			return res.status(400).json({ error: "something went wrong" })
+		}
+	}
+
+	async delete(req: Request, res: Response){
+		const { id } = req.params
+		const userId = req.params.userId
+		try{
+			const parkingSpace = await parkingSpaceService.delete(id, userId)
+			return res.status(200).json(parkingSpace)
+		} catch(error){
+			return res.status(400).json({ error: "something went wrong" })
 		}
 	}
 

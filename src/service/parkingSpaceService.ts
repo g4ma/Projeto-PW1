@@ -116,4 +116,43 @@ export class ParkingSpaceService{
 		}
 	}
 
+	async delete(id: string, userId: string){
+		try{
+			const owner = await prisma.owner.findUnique({
+				where: {
+					userId
+				}
+			})
+
+			if(!owner){
+				throw new Error("user is not owner type")
+			}
+
+
+			const parkingSpace = await prisma.parkingSpace.findUnique({
+				where: {
+					id,
+					ownerId: owner.userId
+				}
+			})
+
+			if(!parkingSpace){
+				throw new Error("parking space doens't exists")
+			}
+
+
+			const parkingSpaceDeleted = await prisma.parkingSpace.delete({
+				where: {
+					id
+				}
+			})
+
+
+			return parkingSpaceDeleted
+		} catch(error){
+			console.error(error)
+			throw error
+		}
+	}
+
 }
