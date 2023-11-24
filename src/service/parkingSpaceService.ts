@@ -6,7 +6,6 @@ enum parkingSpaceType{
 }
 
 type Params = {
-    picture: string
     latitude: number
     longitude: number
     pricePerHour: number
@@ -26,11 +25,10 @@ type ParamsUpdate = {
 
 export class ParkingSpaceService{
 
-	async create({picture, latitude, longitude, pricePerHour, disponibility, description, type, ownerId}: Params){
+	async create({latitude, longitude, pricePerHour, disponibility, description, type, ownerId}: Params){
 		try{
 			const newParkingSpace = await prisma.parkingSpace.create({
 				data: {
-					picture,
 					latitude,
 					longitude, 
 					type,
