@@ -53,4 +53,14 @@ export class ParkingSpaceService{
 			throw error
 		}
 	}
+
+	async listAll(){
+		try{
+			const parkingSpaces = await prisma.parkingSpace.findMany()
+			return parkingSpaces
+		} catch(error){
+			console.error(error)
+			throw error
+		}
+	}
 }
