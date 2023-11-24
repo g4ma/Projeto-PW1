@@ -40,4 +40,17 @@ export class ParkingSpaceService{
 		}
 	}
 
+	async detail(id: string){
+		try{
+			const parkingSpace = await prisma.parkingSpace.findUniqueOrThrow({
+				where: {
+					id
+				}
+			})
+			return parkingSpace
+		} catch(error){
+			console.error(error)
+			throw error
+		}
+	}
 }

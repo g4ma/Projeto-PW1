@@ -15,4 +15,14 @@ export class ParkingSpaceController{
 			return res.status(400).json({ error: "something went wrong"})
 		}
 	}
+
+	async detail(req: Request, res: Response){
+		const { id } = req.params
+		try{
+			const parkingSpace = await parkingSpaceService.detail(id)
+			return res.status(200).json({ parkingSpace })
+		} catch(error){
+			return res.status(404).json({ error: error.message})
+		}
+	}
 }
