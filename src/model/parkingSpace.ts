@@ -5,5 +5,6 @@ export interface ParkingSpace{
   pricePerHour:  number
   disponibility: string 
   description:   string 
+  type:          string
   ownerId:       string 
 }

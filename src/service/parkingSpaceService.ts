@@ -1,6 +1,6 @@
 import { ParkingSpaceType } from "@prisma/client"
 import { prisma } from "../database/prisma"
-
+import { parkingSpaceValidateZod } from "../utils/parkingSpaceValidateZod"
 
 type Params = {
 	pictures: Express.Multer.File[]
@@ -25,6 +25,13 @@ export class ParkingSpaceService{
 
 	async create({pictures, latitude, longitude, pricePerHour, disponibility, description, type, ownerId}: Params){
 		try{
+			const result = parkingSpaceValidateZod({latitude, longitude, pricePerHour, disponibility, description, type, ownerId})
+
+			if (!result.success) {
+				const formattedError = result.error.format()
+				throw new Error(...formattedError._errors)
+			}
+	
 			const newParkingSpace = await prisma.parkingSpace.create({
 				data: {
 					latitude,
