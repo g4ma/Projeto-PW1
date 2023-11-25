@@ -1,31 +1,29 @@
+import { ParkingSpaceType } from "@prisma/client"
 import { prisma } from "../database/prisma"
 
-enum parkingSpaceType{
-    Moto,
-    Carro,
-}
 
 type Params = {
+	pictures: Express.Multer.File[]
     latitude: number
     longitude: number
     pricePerHour: number
-    disponibility: string
+    disponibility: boolean
     description: string
-    type: parkingSpaceType
+    type: ParkingSpaceType
     ownerId: string
 }
 
 type ParamsUpdate = {
 	id: string
 	userId: string
-	disponibility?: string
+	disponibility?: boolean
 	description?: string
 	pricePerHour?: number
 }
 
 export class ParkingSpaceService{
 
-	async create({latitude, longitude, pricePerHour, disponibility, description, type, ownerId}: Params){
+	async create({pictures, latitude, longitude, pricePerHour, disponibility, description, type, ownerId}: Params){
 		try{
 			const newParkingSpace = await prisma.parkingSpace.create({
 				data: {
@@ -35,7 +33,12 @@ export class ParkingSpaceService{
 					pricePerHour,
 					disponibility,
 					description,
-					ownerId
+					ownerId,
+					picture: {
+						create: pictures.map(pic => ({
+							path: pic.filename
+						}))
+					}
 				}
 			})
 

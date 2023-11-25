@@ -1,11 +1,15 @@
 import { Router } from "express"
 import { ParkingSpaceController } from "../controller/parkingSpaceController"
 import { checkLogin } from "../middlewares/checkLogin"
+import multer  from "multer"
+import uploadConfig from "../config/upload"
+
+const upload = multer(uploadConfig.upload("./pictures"))
 
 const parkingSpaceRoutes = Router()
 const parkingSpaceController = new ParkingSpaceController()
 
-parkingSpaceRoutes.post("/parkingSpaces", checkLogin, parkingSpaceController.create)
+parkingSpaceRoutes.post("/parkingSpaces", checkLogin, upload.array("pictures"), parkingSpaceController.create)
 parkingSpaceRoutes.get("/parkingSpaces/:id", checkLogin, parkingSpaceController.detail)
 parkingSpaceRoutes.get("/parkingSpaces", checkLogin, parkingSpaceController.listAll)
 parkingSpaceRoutes.patch("/parkingSpaces/:id", checkLogin, parkingSpaceController.update)

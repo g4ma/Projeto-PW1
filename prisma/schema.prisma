@@ -43,8 +43,8 @@ model ParkingSpace {
   ownerId String @db.VarChar(36)
   owner   Owner  @relation(fields: [ownerId], references: [userId])
 
-  Reservation Reservation[]
-  Picture     Picture[]
+  reservation Reservation[]
+  picture     Picture[]
 }
 
 model Reservation {
