@@ -25,6 +25,16 @@ export class ParkingSpaceService{
 
 	async create({pictures, latitude, longitude, pricePerHour, disponibility, description, type, ownerId}: Params){
 		try{
+			const owner = await prisma.owner.findUnique({
+				where: {
+					userId: ownerId
+				}
+			})
+
+			if(!owner){
+				throw new Error("user is not owner type")
+			}
+
 			const result = parkingSpaceValidateZod({latitude, longitude, pricePerHour, disponibility, description, type, ownerId})
 
 			if (!result.success) {

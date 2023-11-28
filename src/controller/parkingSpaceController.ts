@@ -7,7 +7,6 @@ export class ParkingSpaceController{
 	async create(req: Request, res: Response){
 		const ownerId = req.params.userId
 		const pictures = req.files as Express.Multer.File[]
-		// const picturesPath = pictures.map((img) => ({path:img.path}))
 
 		const { latitude, longitude, description, pricePerHour, disponibility, type } = req.body
 		try{
