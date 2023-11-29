@@ -11,7 +11,7 @@ const parkingSpaceController = new ParkingSpaceController()
 
 parkingSpaceRoutes.post("/parkingSpaces", checkLogin, upload.array("pictures"), parkingSpaceController.create)
 parkingSpaceRoutes.get("/parkingSpaces/:id", checkLogin, parkingSpaceController.detail)
-parkingSpaceRoutes.get("/parkingSpaces", checkLogin, parkingSpaceController.listAll)
+parkingSpaceRoutes.get("/parkingSpaces", parkingSpaceController.listAll)
 parkingSpaceRoutes.patch("/parkingSpaces/:id", checkLogin, parkingSpaceController.update)
 parkingSpaceRoutes.delete("/parkingSpaces/:id", checkLogin, parkingSpaceController.delete)
 

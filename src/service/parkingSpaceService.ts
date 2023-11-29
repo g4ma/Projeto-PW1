@@ -1,6 +1,6 @@
 import { ParkingSpaceType } from "@prisma/client"
 import { prisma } from "../database/prisma"
-import { parkingSpaceValidateZod } from "../utils/parkingSpaceValidateZod"
+import { parkingSpaceValidateZod, parkingSpaceValidateZodUpd } from "../utils/parkingSpaceValidateZod"
 
 type Params = {
 	pictures: Express.Multer.File[]
@@ -36,19 +36,20 @@ export class ParkingSpaceService{
 			}
 
 			const result = parkingSpaceValidateZod({latitude, longitude, pricePerHour, disponibility, description, type, ownerId})
-
+			
 			if (!result.success) {
 				const formattedError = result.error.format()
+				console.log(formattedError)
 				throw new Error(...formattedError._errors)
 			}
-	
+
 			const newParkingSpace = await prisma.parkingSpace.create({
 				data: {
-					latitude,
-					longitude, 
+					latitude: parseFloat(latitude.toString()),
+					longitude: parseFloat(longitude.toString()), 
 					type,
-					pricePerHour,
-					disponibility,
+					pricePerHour: parseInt(pricePerHour.toString()),
+					disponibility: Boolean(disponibility),
 					description,
 					ownerId,
 					picture: {
@@ -71,6 +72,13 @@ export class ParkingSpaceService{
 			const parkingSpace = await prisma.parkingSpace.findUniqueOrThrow({
 				where: {
 					id
+				},
+				include: {
+					picture: {
+						select: {
+							path: true
+						}
+					}
 				}
 			})
 			return parkingSpace
@@ -102,11 +110,20 @@ export class ParkingSpaceService{
 				throw new Error("user is not owner type")
 			}
 
+			const ownerId = owner.userId
+
+			const result = parkingSpaceValidateZodUpd({pricePerHour, disponibility, description, ownerId})
+			
+			if (!result.success) {
+				const formattedError = result.error.format()
+				console.log(formattedError)
+				throw new Error(...formattedError._errors)
+			}
 
 			const parkingSpace = await prisma.parkingSpace.findUnique({
 				where: {
 					id,
-					ownerId: owner.userId
+					ownerId
 				}
 			})
 
@@ -114,7 +131,7 @@ export class ParkingSpaceService{
 				throw new Error("parking space doens't exists")
 			}
 
-
+			console.log(pricePerHour)
 			const parkingSpaceUpdated = await prisma.parkingSpace.update({
 				where: {
 					id
@@ -125,7 +142,7 @@ export class ParkingSpaceService{
 					pricePerHour: pricePerHour ?? parkingSpace.pricePerHour,
 				}
 			})
-
+			console.log(parkingSpaceUpdated)
 
 			return parkingSpaceUpdated
 		} catch(error){
@@ -158,6 +175,19 @@ export class ParkingSpaceService{
 				throw new Error("parking space doens't exists")
 			}
 
+			const pictures = await prisma.picture.findMany({
+				where: {
+					parkingSpaceId: parkingSpace.id,
+				},
+			})
+
+			if(pictures){
+				await prisma.picture.deleteMany({
+					where: {
+						parkingSpaceId: parkingSpace.id,
+					},
+				})
+			}
 
 			const parkingSpaceDeleted = await prisma.parkingSpace.delete({
 				where: {
