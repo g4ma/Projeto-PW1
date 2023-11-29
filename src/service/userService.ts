@@ -1,5 +1,5 @@
-import { prisma } from "../database/prisma"
-import { encrypt } from "../utils/security"
+import { prisma } from '../database/prisma'
+import { encrypt } from '../utils/security'
 
 type Params ={
   name:string;
@@ -24,7 +24,7 @@ export class UserService{
 			}
 		})
 		if(user !== null){
-			throw new Error("user already exists")
+			throw new Error('user already exists')
 		}
 
 		const encryptedPassword = encrypt(password)
@@ -75,7 +75,7 @@ export class UserService{
 	}
 	async detail({id}: ParamsUpdate){
 		if(!id){
-			throw new Error("Invalid id")
+			throw new Error('Invalid id')
 		}
 		const detailedUser = await prisma.user.findUnique({
 			where:{
@@ -94,7 +94,7 @@ export class UserService{
 	}
 	async upgrade({id, pixKey}: ParamsUpdate){
 		if(!id || !pixKey){
-			throw new Error("Invalid data")
+			throw new Error('Invalid data')
 		} 
 		
 		const upgradedUser = await prisma.owner.create({
