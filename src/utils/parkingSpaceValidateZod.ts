@@ -1,5 +1,5 @@
-import { z } from "zod"
-import { ParkingSpaceType } from "@prisma/client"
+import { z } from 'zod'
+import { ParkingSpaceType } from '@prisma/client'
 
 interface ParkingSpaceParamsValidate {
     latitude: number
@@ -20,11 +20,11 @@ interface ParkingSpaceParamsValidateUpd {
 export function parkingSpaceValidateZod(parkingSpace: ParkingSpaceParamsValidate){
 	const schemaZod = z.object({
 		type: z.nativeEnum(ParkingSpaceType),
-		latitude: z.coerce.number({required_error: "latitude is required"}),
-		longitude: z.coerce.number({required_error: "longitude is required"}),
-		pricePerHour: z.coerce.number({required_error: "pricePerHour is required"}),
-		disponibility: z.coerce.boolean({required_error: "disponibility is required"}),
-		description: z.string({required_error:"description is required"}),
+		latitude: z.coerce.number({required_error: 'latitude is required'}),
+		longitude: z.coerce.number({required_error: 'longitude is required'}),
+		pricePerHour: z.coerce.number({required_error: 'pricePerHour is required'}),
+		disponibility: z.coerce.boolean({required_error: 'disponibility is required'}),
+		description: z.string({required_error:'description is required'}),
 		ownerId: z.string(),
 	})
 
