@@ -4,19 +4,24 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "dev": "tsx watch src/app.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.5.10",
     "@types/node": "^20.8.10",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",
     "dotenv": "^16.3.1",
     "eslint": "^8.53.0",
-    "tsx": "^3.14.0"
+    "jest": "^29.7.0",
+    "jest-mock-extended": "^3.0.5",
+    "ts-jest": "^29.1.1",
+    "tsx": "^3.14.0",
+    "typescript": "^5.3.2"
   },
   "dependencies": {
     "@prisma/client": "^5.5.2",
@@ -32,7 +37,6 @@
     "redis": "^4.6.11",
     "ts-node": "^10.9.1",
     "tsc": "^2.0.4",
-    "typescript": "^5.2.2",
     "zod": "^3.22.4"
   }
 }
