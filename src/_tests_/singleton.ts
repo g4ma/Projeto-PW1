@@ -10,10 +10,11 @@ jest.mock("../database/prisma", () => ({
 	default: mockDeep<PrismaClient>(),
 }))
 
-// Cast the mocked prisma to DeepMockProxy<PrismaClient>
-export const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>
 
 // Reset the mock before each test
 beforeEach(() => {
 	mockReset(prismaMock)
 })
+
+// Cast the mocked prisma to DeepMockProxy<PrismaClient>
+export const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>
