@@ -14,7 +14,6 @@ const { SECRET } = process.env
 
 class AuthService{
 	async login({email, password}: ParamsLogin){
-		console.log(password, encrypt(password))
 		const user = await prisma.user.findUnique({
 			where: {
 				email,
