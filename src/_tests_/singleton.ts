@@ -7,7 +7,7 @@ import {prisma} from "../database/prisma"
 // Mock the entire module with a deep mock of PrismaClient
 jest.mock("../database/prisma", () => ({
 	__esModule: true,
-	default: mockDeep<PrismaClient>(),
+	prisma: mockDeep<PrismaClient>(),
 }))
 
 
