@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken'
-import {encrypt} from '../utils/security'
-import DotEnv from 'dotenv'
-import { prisma } from '../database/prisma'
+import jwt from "jsonwebtoken"
+import {encrypt} from "../utils/security"
+import DotEnv from "dotenv"
+import { prisma } from "../database/prisma"
 
 DotEnv.config()
 
@@ -21,12 +21,12 @@ class AuthService{
 			}
 		})
 		if (user !== null){
-			const token = jwt.sign({id: user.id}, SECRET, {
-				expiresIn: '1h'
+			const token = jwt.sign({id: user.id}, SECRET!, {
+				expiresIn: "1h"
 			})
 			return {token: token}
 		}
-		throw new Error('User with email and password provided does not exist')
+		throw new Error("User with email and password provided does not exist")
 	}
 
 }
