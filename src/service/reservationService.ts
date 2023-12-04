@@ -1,4 +1,5 @@
 import { prisma } from '../database/prisma';
+import { ReservationPaymentStatus } from '../model/reservationPaymentStatus';
 import { CheckReservationAvailability } from '../utils/checkReservationAvailability';
 
 export class ReservationServer {
@@ -10,15 +11,14 @@ export class ReservationServer {
             throw new Error("parking space already ocupied");
         }
 
-        const newReservation = prisma.reservation.create({
+        const newReservation = await prisma.reservation.create({
             data: {
                 userId,
                 parkingSpaceId,
                 startTime,
                 endTime,
                 startDate,
-                endDate,
-                paymentStatus: "pending"
+                endDate
             }
         });
 
@@ -75,21 +75,33 @@ export class ReservationServer {
 
         return deletedReservation;
     }
-    async updateStatsPayment(id: string, status: string) {
-        try {
-            const updatedStatusPayment = prisma.reservation.update({
-                where: {
-                    id
-                },
-                data: {
-                    paymentStatus: status
-                }
-            });
-            return updatedStatusPayment;
-        } catch (error) {
-            console.log(error)
-            throw new Error(error);
+    async updateStatusPayment(id: string, newStatus: string) {
+
+        const reservation = await prisma.reservation.findUnique({
+            where: {
+                id
+            }
+        })
+
+        if (!reservation) {
+            throw new Error("reservation does not exist");
         }
+
+        if (!Object.values(ReservationPaymentStatus).includes(newStatus as ReservationPaymentStatus)) {
+            throw new Error("reservation status invalid");
+        }
+
+        const updatedStatusPayment = await prisma.reservation.update({
+            where: {
+                id
+            },
+            data: {
+                paymentStatus: newStatus
+            }
+        });
+
+        return updatedStatusPayment;
+
     }
     async updateReservationDate(id: string, endTime: string, endDate: string) {
 
@@ -108,16 +120,16 @@ export class ReservationServer {
 
         if (oldEndDate.getDate() - newEndDate.getDate() < 0) {
 
-            if (reservation.paymentStatus === "pending") {
+            if (reservation.paymentStatus === ReservationPaymentStatus.Pendente) {
 
-                const updatedReservation = prisma.reservation.update({
+                const updatedReservation = await prisma.reservation.update({
                     where: {
                         id
                     },
                     data: {
                         endTime,
                         endDate,
-                        paymentStatus: "pending"
+                        paymentStatus: ReservationPaymentStatus.Pendente
                     }
                 });
 
@@ -136,7 +148,7 @@ export class ReservationServer {
             data: {
                 endTime
                 endDate,
-                paymentStatus: "pending"
+                paymentStatus: ReservationPaymentStatus.Pendente
             }
         });
 
