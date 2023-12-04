@@ -2,7 +2,7 @@ import { prisma } from '../database/prisma';
 import { ReservationPaymentStatus } from '../model/reservationPaymentStatus';
 import { CheckReservationAvailability } from '../utils/checkReservationAvailability';
 
-export class ReservationServer {
+export class ReservationService {
     async create(userId: string, parkingSpaceId: string, startDate: string, endDate: string, startTime: string, endTime: string) {
 
         const isAvaiable = await CheckReservationAvailability(parkingSpaceId, startDate, startTime, endDate, endTime);
@@ -96,7 +96,7 @@ export class ReservationServer {
                 id
             },
             data: {
-                paymentStatus: newStatus
+                paymentStatus: newStatus as ReservationPaymentStatus
             }
         });
 
@@ -146,7 +146,7 @@ export class ReservationServer {
                 id
             },
             data: {
-                endTime
+                endTime,
                 endDate,
                 paymentStatus: ReservationPaymentStatus.Pendente
             }
