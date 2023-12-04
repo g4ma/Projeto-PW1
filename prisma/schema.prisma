@@ -15,9 +15,9 @@ datasource db {
 model User {
   id          String @id @default(uuid()) @db.VarChar(36)
   name        String @db.VarChar(80)
-  email       String @db.VarChar(256)
+  email       String @unique @db.VarChar(256)
   phoneNumber String @db.VarChar(16)
-  password    String @db.VarChar(16)
+  password    String @db.VarChar(255)
 
   Owner       Owner?
   Reservation Reservation[]
@@ -33,34 +33,48 @@ model Owner {
 
 model ParkingSpace {
   id            String           @id @default(uuid()) @db.VarChar(36)
-  picture       String           @db.VarChar(100)
-  locationLat   Float
-  locationLng   Float
+  latitude      Float
+  longitude     Float
   pricePerHour  Float
-  disponibility String           @db.VarChar(50)
+  disponibility Boolean          @default(false)
   description   String           @db.VarChar(50)
   type          ParkingSpaceType
 
   ownerId String @db.VarChar(36)
   owner   Owner  @relation(fields: [ownerId], references: [userId])
 
-  Reservation Reservation[]
+  reservation Reservation[]
+  picture     Picture[]
 }
 
 model Reservation {
-  id             String @id @default(uuid()) @db.VarChar(36)
-  userId         String @db.VarChar(36)
-  parkingSpaceId String @db.VarChar(36)
+  id             String                   @id @default(uuid()) @db.VarChar(36)
+  userId         String                   @db.VarChar(36)
+  parkingSpaceId String                   @db.VarChar(36)
   startTime      String
   endTime        String
   date           String
-  paymentStatus  String @db.VarChar(20)
+  paymentStatus  ReservationPaymentStatus @default(Pendente)
 
   parkingSpace ParkingSpace @relation(fields: [parkingSpaceId], references: [id])
   user         User         @relation(fields: [userId], references: [id])
 }
 
+model Picture {
+  id             String @id @default(uuid()) @db.VarChar(36)
+  parkingSpaceId String
+  path           String
+
+  parkingSpace ParkingSpace @relation(fields: [parkingSpaceId], references: [id])
+}
+
 enum ParkingSpaceType {
   Moto
   Carro
+}
+
+enum ReservationPaymentStatus {
+  Cancelado
+  Aprovado
+  Pendente
 }

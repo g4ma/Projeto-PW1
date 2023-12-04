@@ -6,6 +6,10 @@ services:
     build: ./database
     ports: 
      - "5433:5432" 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
   app:
     container_name: app
     image: pw1/app
