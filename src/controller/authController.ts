@@ -10,7 +10,6 @@ export class AuthControler{
 			const result = await authService.login({email, password})
 			res.status(200).json(result)
 		} catch (error: unknown) {
-			console.log(error)
 			res.status(400).json({ error: 'something went wrong' })
 		}
 	}}
