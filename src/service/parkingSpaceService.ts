@@ -1,6 +1,7 @@
 import { ParkingSpaceType } from "@prisma/client"
 import { prisma } from "../database/prisma"
 import { parkingSpaceValidateZod, parkingSpaceValidateZodUpd } from "../utils/parkingSpaceValidateZod"
+import { ParkingSpaceError } from "../utils/parkingSpaceError"
 
 type Params = {
 	pictures: Express.Multer.File[]
@@ -32,7 +33,7 @@ export class ParkingSpaceService{
 			})
 
 			if(!owner){
-				throw new Error("user is not owner type")
+				throw new ParkingSpaceError("user is not owner type")
 			}
 
 			const result = parkingSpaceValidateZod({latitude, longitude, pricePerHour, disponibility, description, type, ownerId})
@@ -81,6 +82,11 @@ export class ParkingSpaceService{
 					}
 				}
 			})
+
+			if(!parkingSpace){
+				throw new ParkingSpaceError("parking space doens't exists")
+			}
+
 			return parkingSpace
 		} catch(error){
 			console.error(error)
@@ -107,7 +113,7 @@ export class ParkingSpaceService{
 			})
 
 			if(!owner){
-				throw new Error("user is not owner type")
+				throw new ParkingSpaceError("user is not owner type")
 			}
 
 			const ownerId = owner.userId
@@ -128,7 +134,7 @@ export class ParkingSpaceService{
 			})
 
 			if(!parkingSpace){
-				throw new Error("parking space doens't exists")
+				throw new ParkingSpaceError("parking space doens't exists")
 			}
 
 			console.log(pricePerHour)
@@ -160,7 +166,7 @@ export class ParkingSpaceService{
 			})
 
 			if(!owner){
-				throw new Error("user is not owner type")
+				throw new ParkingSpaceError("user is not owner type")
 			}
 
 
@@ -172,7 +178,7 @@ export class ParkingSpaceService{
 			})
 
 			if(!parkingSpace){
-				throw new Error("parking space doens't exists")
+				throw new ParkingSpaceError("parking space doens't exists")
 			}
 
 			const pictures = await prisma.picture.findMany({
