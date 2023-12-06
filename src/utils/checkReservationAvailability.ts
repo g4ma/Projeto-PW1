@@ -9,8 +9,6 @@ export class CheckReservationAvailability {
         const StartDate = new Date(`${startDate}T${startTime}`);
         const EndDate = new Date(`${endDate}T${endTime}`);
 
-        console.log(StartDate + "  " + EndDate);
-
         if (StartDate > EndDate || EndDate < StartDate) {
             return false;
         }
