@@ -1,7 +1,7 @@
-import { type } from 'os';
 import { prisma } from '../database/prisma';
 import { ReservationPaymentStatus } from '../model/reservationPaymentStatus';
 import { CheckReservationAvailability } from '../utils/checkReservationAvailability';
+import { reservationCreateValidateZod, reservationUpdateDateValidateZod, reservationUpdateStatusValidateZod } from '../utils/reservationValidateZod';
 
 type ParamsCreate = {
     userId: string;
@@ -21,7 +21,7 @@ type ParamsDelete = {
 type ParamsUpdateStatus = {
     userId: string;
     reservationId?: string;
-    newStatus?: string;
+    newStatus?: ReservationPaymentStatus;
 }
 type ParamsUpdateDate = {
     userId: string;
@@ -37,6 +37,14 @@ export class ReservationService {
 
         if (!isAvaiable) {
             throw new Error("parking space already ocupied");
+        }
+
+        const result = reservationCreateValidateZod({ userId, parkingSpaceId, startDate, endDate, startTime, endTime });
+
+        if (!result.success) {
+            const formattedError = result.error.format();
+            console.log(formattedError);
+            throw new Error(...formattedError._errors);
         }
 
         const newReservation = await prisma.reservation.create({
@@ -123,8 +131,12 @@ export class ReservationService {
             throw new Error("user can not update this reservation");
         }
 
-        if (!Object.values(ReservationPaymentStatus).includes(newStatus as ReservationPaymentStatus)) {
-            throw new Error("reservation status invalid");
+        const result = reservationUpdateStatusValidateZod({ newStatus });
+
+        if (!result.success) {
+            const formattedError = result.error.format();
+            console.log(formattedError);
+            throw new Error(...formattedError._errors);
         }
 
         const updatedStatusPayment = await prisma.reservation.update({
@@ -155,8 +167,20 @@ export class ReservationService {
             throw new Error("user can not delete this reservation");
         }
 
+        const result = reservationUpdateDateValidateZod({ endDate, endTime });
+
+        if (!result.success) {
+            const formattedError = result.error.format();
+            console.log(formattedError);
+            throw new Error(...formattedError._errors);
+        }
+
         const newEndDate = new Date(`${endDate}T${endTime}`);
         const oldEndDate = new Date(`${reservation.endDate}T${reservation.endTime}`);
+
+        if (newEndDate === oldEndDate) {
+            throw new Error("new end date is the same");
+        }
 
         if (oldEndDate.getDate() - newEndDate.getDate() < 0) {
 

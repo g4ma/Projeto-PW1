@@ -69,9 +69,9 @@ export class ReservationController {
 
     async updatePaymentStatus(req: Request, res: Response) {
         const { newStatus } = req.body;
-        const userId = req.params.userId;
         const { reservationId } = req.params;
-
+        const userId = req.params.userId;
+        
         try {
             const result = await reservationService.updateStatusPayment({
                 userId,
@@ -86,7 +86,8 @@ export class ReservationController {
     }
 
     async updateReservationDate(req: Request, res: Response) {
-        const { reservationId, endDate, endTime } = req.body;
+        const { endDate, endTime } = req.body;
+        const { reservationId } = req.params;
         const userId = req.params.userId;
 
         try {
