@@ -1,9 +1,37 @@
+import { type } from 'os';
 import { prisma } from '../database/prisma';
 import { ReservationPaymentStatus } from '../model/reservationPaymentStatus';
 import { CheckReservationAvailability } from '../utils/checkReservationAvailability';
 
+type ParamsCreate = {
+    userId: string;
+    parkingSpaceId: string;
+    startTime: string;
+    endTime: string;
+    startDate: string;
+    endDate: string;
+}
+type ParamsUser = {
+    userId: string;
+}
+type ParamsDelete = {
+    userId: string;
+    reservationId?: string;
+}
+type ParamsUpdateStatus = {
+    userId: string;
+    reservationId?: string;
+    newStatus?: string;
+}
+type ParamsUpdateDate = {
+    userId: string;
+    reservationId?: string;
+    endDate?: string;
+    endTime?: string;
+}
+
 export class ReservationService {
-    async create(userId: string, parkingSpaceId: string, startDate: string, endDate: string, startTime: string, endTime: string) {
+    async create({ userId, parkingSpaceId, startDate, endDate, startTime, endTime }: ParamsCreate) {
 
         const isAvaiable = await CheckReservationAvailability(parkingSpaceId, startDate, startTime, endDate, endTime);
 
@@ -25,10 +53,10 @@ export class ReservationService {
         return newReservation;
 
     }
-    async listOwner(id: string) {
+    async listOwner({ userId }: ParamsUser) {
         const owner = await prisma.owner.findUnique({
             where: {
-                userId: id
+                userId
             }
         });
 
@@ -39,7 +67,7 @@ export class ReservationService {
         const reservations = await prisma.reservation.findMany({
             where: {
                 parkingSpace: {
-                    ownerId: id
+                    ownerId: userId
                 }
             }
         });
@@ -47,19 +75,19 @@ export class ReservationService {
         return reservations;
 
     }
-    async listAll(id: string) {
+    async listAll({ userId }: ParamsUser) {
         const reservations = await prisma.reservation.findMany({
             where: {
-                userId: id
+                userId
             }
         });
 
         return reservations;
     }
-    async delete(id: string) {
+    async delete({ userId, reservationId }: ParamsDelete) {
         const reservation = await prisma.reservation.findUnique({
             where: {
-                id: id
+                id: reservationId
             }
         });
 
@@ -67,24 +95,32 @@ export class ReservationService {
             throw new Error("reservation does not exist");
         }
 
+        if (reservation.userId != userId) {
+            throw new Error("user can not delete this reservation");
+        }
+
         const deletedReservation = await prisma.reservation.delete({
             where: {
-                id: id
+                id: reservationId
             }
         })
 
         return deletedReservation;
     }
-    async updateStatusPayment(id: string, newStatus: string) {
+    async updateStatusPayment({ userId, reservationId, newStatus }: ParamsUpdateStatus) {
 
         const reservation = await prisma.reservation.findUnique({
             where: {
-                id
+                id: reservationId
             }
         })
 
         if (!reservation) {
             throw new Error("reservation does not exist");
+        }
+
+        if (reservation.userId != userId) {
+            throw new Error("user can not update this reservation");
         }
 
         if (!Object.values(ReservationPaymentStatus).includes(newStatus as ReservationPaymentStatus)) {
@@ -93,7 +129,7 @@ export class ReservationService {
 
         const updatedStatusPayment = await prisma.reservation.update({
             where: {
-                id
+                id: reservationId
             },
             data: {
                 paymentStatus: newStatus as ReservationPaymentStatus
@@ -103,16 +139,20 @@ export class ReservationService {
         return updatedStatusPayment;
 
     }
-    async updateReservationDate(id: string, endTime: string, endDate: string) {
+    async updateReservationDate({ userId, reservationId, endDate, endTime }: ParamsUpdateDate) {
 
         const reservation = await prisma.reservation.findUnique({
             where: {
-                id
+                id: reservationId
             }
         });
 
         if (!reservation) {
             throw new Error("reservation does not exist");
+        }
+
+        if (reservation.userId != userId) {
+            throw new Error("user can not delete this reservation");
         }
 
         const newEndDate = new Date(`${endDate}T${endTime}`);
@@ -124,7 +164,7 @@ export class ReservationService {
 
                 const updatedReservation = await prisma.reservation.update({
                     where: {
-                        id
+                        id: reservationId
                     },
                     data: {
                         endTime,
@@ -143,7 +183,7 @@ export class ReservationService {
 
         const updatedReservation = prisma.reservation.update({
             where: {
-                id
+                id: reservationId
             },
             data: {
                 endTime,
