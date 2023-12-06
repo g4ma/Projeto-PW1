@@ -29,7 +29,6 @@ type ParamsUpdateDate = {
     endDate?: string;
     endTime?: string;
 }
-
 export class ReservationService {
     async create({ userId, parkingSpaceId, startDate, endDate, startTime, endTime }: ParamsCreate) {
 
