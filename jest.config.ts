@@ -16,7 +16,7 @@ import type {Config} from "jest"
 const config: Config = {
 	preset: "ts-jest",
 	testEnvironment: "node",
-	setupFilesAfterEnv: ["<rootDir>/src/_tests_/singleton.ts"],
+	// setupFilesAfterEnv: ["<rootDir>/src/_tests_/singleton.ts"],
 	// All imported modules in your tests should be mocked automatically
 
 	// automock: false,
