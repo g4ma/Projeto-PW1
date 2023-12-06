@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { prismaMock } from "./singleton"
 import { ReservationService } from "../service/reservationService"
-import * as validate from "../utils/parkingSpaceValidateZod"
+// import * as validate from "../utils/parkingSpaceValidateZod"
 import { ReservationPaymentStatus } from "@prisma/client"
 
 describe("Gerenciador de vagas de estacionamento", () => {
@@ -51,7 +51,7 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			]
 
 			prismaMock.owner.findUnique.mockResolvedValue({userId: ownerId, pixKey: "fjaskfhaskjfaskj"})
-			prismaMock.reservation.findMany(reservationMocks)
+			prismaMock.reservation.findMany.mockResolvedValue(reservationMocks)
 			const reservations = await gerenciador.listOwner(ownerId)
 
 			expect(reservations).toBe(reservationMocks)
@@ -67,19 +67,38 @@ describe("Gerenciador de vagas de estacionamento", () => {
 				parkingSpaceId: "83dd55f9-ce2c-454d-a10a-a0968b4b3c69",
 				startTime: "19:00",
 				endTime: "23:35",
-				startDate: "28/11/2023",   
-				endDate: "28/11/2023",  
+				startDate: "2023-11-20",   
+				endDate: "2023-11-20",  
 				paymentStatus: ReservationPaymentStatus.Aprovado
 			}
+
 			const { id } = reservation
 
 			prismaMock.reservation.findUnique.mockResolvedValue(reservation)
 
-			await expect(gerenciador.updateReservationDate(id, "23:00", "28/11/2023")).rejects.toEqual(new Error("invalid end time"))	
+			await expect(gerenciador.updateReservationDate(id, "23:30", "2023-11-19")).rejects.toEqual(new Error("invalid end time"))	
 		})
 
-		test("Registrar reserva de vaga de estacionamento com horário em uma data não disponível", () => {
-			
+		test("Deletar reserva que não existe", async () => {
+			const reservation = { 
+				id: "71d43ea8-5b26-477a-8a7f-4875767b49a7",
+				userId: "2224b611-37c3-4478-a66e-3d4ff1a4141d",
+				parkingSpaceId: "d67a6a5b-de2d-4061-8669-7bb8481b6cf5",
+				startTime: "08:00",
+				endTime: "09:00",
+				startDate: "2023-11-28",   
+				endDate: "2023-11-28",  
+				paymentStatus: ReservationPaymentStatus.Aprovado
+			}
+
+			const { id } = reservation
+
+			prismaMock.reservation.findUnique.mockResolvedValue(reservation)
+			await expect(gerenciador.delete(id)).rejects.toEqual(new Error("reservation does not exist"))	
 		})
+
+		// test("Registrar reserva de vaga de estacionamento com horário em uma data não disponível", () => {
+			
+		// })
 	})
 })
