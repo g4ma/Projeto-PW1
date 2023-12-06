@@ -20,8 +20,8 @@ interface ReservationDateValidate {
 }
 
 export function reservationCreateValidateZod(reservation: ReservationParamsValidate) {
-    const isDateFormat = (value) => /^\d{4}-\d{2}-\d{1}$/.test(value);
-    const isTimeFormat = (value) => /^\d{2}-\d{2}$/.test(value);
+    const isDateFormat = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+    const isTimeFormat = (value) => /^\d{2}:\d{2}$/.test(value);
 
     const schemaZod = z.object({
         parkingSpaceId: z.string({ required_error: "parking space id is required" }),
@@ -45,8 +45,8 @@ export function reservationUpdateStatusValidateZod(reservationStatus: Reservatio
 }
 
 export function reservationUpdateDateValidateZod(reservationDate: ReservationDateValidate) {
-    const isDateFormat = (value) => /^\d{4}-\d{2}-\d{1}$/.test(value);
-    const isTimeFormat = (value) => /^\d{2}-\d{2}$/.test(value);
+    const isDateFormat = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+    const isTimeFormat = (value) => /^\d{2}:\d{2}$/.test(value);
 
     const schemaZod = z.object({
         endDate: z.string({ required_error: "end date is required" }).refine(isDateFormat, { message: "the date must be in 0000-00-00 format" }),

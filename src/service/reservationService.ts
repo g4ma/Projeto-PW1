@@ -32,7 +32,15 @@ type ParamsUpdateDate = {
 export class ReservationService {
     async create({ userId, parkingSpaceId, startDate, endDate, startTime, endTime }: ParamsCreate) {
 
-        const isAvaiable = await CheckReservationAvailability(parkingSpaceId, startDate, startTime, endDate, endTime);
+        const checkReservationAvailability = new CheckReservationAvailability();
+
+        const isDateValid = checkReservationAvailability.verifyDate(startDate,startTime,endDate,endTime);
+
+        if(!isDateValid){
+            throw new Error("dates invalid");
+        }
+
+        const isAvaiable = await checkReservationAvailability.verifyAvailability(parkingSpaceId, startDate, startTime, endDate, endTime);
 
         if (!isAvaiable) {
             throw new Error("parking space already ocupied");
@@ -78,16 +86,35 @@ export class ReservationService {
                 }
             }
         });
+        
+
+        if(reservations.length === 0) {
+            return { message: "does not have any reservations"};
+        }
 
         return reservations;
 
     }
     async listAll({ userId }: ParamsUser) {
+        const user = await prisma.user.findUnique({
+            where:{
+                id: userId
+            }
+        });
+
+        if(!user) {
+            throw new Error("user does not exists");
+        }
+        
         const reservations = await prisma.reservation.findMany({
             where: {
                 userId
             }
         });
+
+        if(reservations.length === 0) {
+            return {message: "user does not have any reservations"}
+        }
 
         return reservations;
     }
@@ -181,7 +208,7 @@ export class ReservationService {
             throw new Error("new end date is the same");
         }
 
-        if (oldEndDate.getDate() - newEndDate.getDate() < 0) {
+        if (oldEndDate > newEndDate) {
 
             if (reservation.paymentStatus === ReservationPaymentStatus.Pendente) {
 
