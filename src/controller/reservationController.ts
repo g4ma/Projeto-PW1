@@ -11,14 +11,14 @@ export class ReservationController {
         const { parkingSpaceId, startDate, endDate, startTime, endTime } = req.body;
 
         try {
-            const result = await reservationService.create(
+            const result = await reservationService.create({
                 userId,
                 parkingSpaceId,
                 startDate,
                 endDate,
                 startTime,
                 endTime
-            );
+            });
             res.status(201).json(result);
         } catch (error: unknown) {
             console.log(error);
@@ -28,11 +28,11 @@ export class ReservationController {
     }
 
     async listOwner(req: Request, res: Response) {
-        const ownerId = req.params.userId;
+        const userId = req.params.userId;
 
         try {
-            const result = await reservationService.listOwner(ownerId);
-            res.status(201).json(result);
+            const result = await reservationService.listOwner({ userId });
+            res.status(200).json(result);
         } catch (error) {
             console.log(error);
             res.status(400).json({ error: "something went wrong" });
@@ -43,8 +43,8 @@ export class ReservationController {
         const userId = req.params.userId;
 
         try {
-            const result = await reservationService.listAll(userId);
-            res.status(201).json(result);
+            const result = await reservationService.listAll({ userId });
+            res.status(200).json(result);
         } catch (error) {
             console.log(error);
             res.status(400).json({ error: "something went wrong" });
@@ -52,11 +52,15 @@ export class ReservationController {
     }
 
     async delete(req: Request, res: Response) {
-        const { reservationId } = req.body;
+        const { reservationId } = req.params;
+        const userId = req.params.userId;
 
         try {
-            const result = await reservationService.delete(reservationId);
-            res.status(201).json(result);
+            const result = await reservationService.delete({
+                userId,
+                reservationId
+            });
+            res.status(200).json(result);
         } catch (error) {
             console.log(error);
             res.status(400).json({ error: "something went wrong" });
@@ -64,11 +68,17 @@ export class ReservationController {
     }
 
     async updatePaymentStatus(req: Request, res: Response) {
-        const { reservationId, paymentStatus } = req.body;
-
+        const { newStatus } = req.body;
+        const { reservationId } = req.params;
+        const userId = req.params.userId;
+        
         try {
-            const result = await reservationService.updateStatusPayment(reservationId, paymentStatus);
-            res.status(201).json(result);
+            const result = await reservationService.updateStatusPayment({
+                userId,
+                reservationId,
+                newStatus
+            });
+            res.status(200).json(result);
         } catch (error) {
             console.log(error);
             res.status(400).json({ error: "something went wrong" });
@@ -76,11 +86,18 @@ export class ReservationController {
     }
 
     async updateReservationDate(req: Request, res: Response) {
-        const { reservationId, endDate, endTime } = req.body;
+        const { endDate, endTime } = req.body;
+        const { reservationId } = req.params;
+        const userId = req.params.userId;
 
         try {
-            const result = await reservationService.updateReservationDate(reservationId, endTime, endDate);
-            res.status(201).json(result);
+            const result = await reservationService.updateReservationDate({
+                userId,
+                reservationId,
+                endDate,
+                endTime
+            });
+            res.status(200).json(result);
         } catch (error) {
             console.log(error);
             res.status(400).json({ error: "something went wrong" });
