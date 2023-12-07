@@ -19,16 +19,27 @@ interface ReservationDateValidate {
     endTime?: string
 }
 
-export function reservationCreateValidateZod(reservation: ReservationParamsValidate) {
-    const isDateFormat = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
-    const isTimeFormat = (value) => /^\d{2}:\d{2}$/.test(value);
+const isDateFormat = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+const isTimeFormat = (value: string): boolean => /^\d{2}:\d{2}$/.test(value);
 
+const isValidTime = (value: string): boolean => {
+    if (!isTimeFormat(value)) {
+        return false;
+    }
+    const [hours, minutes] = value.split(':');
+    const parsedHours = parseInt(hours, 10);
+    const parsedMinutes = parseInt(minutes, 10);
+    return parsedHours >= 0 && parsedHours <= 23 && parsedMinutes >= 0 && parsedMinutes <= 59;
+};
+
+
+export function reservationCreateValidateZod(reservation: ReservationParamsValidate) {
     const schemaZod = z.object({
         parkingSpaceId: z.string({ required_error: "parking space id is required" }),
         startDate: z.string({ required_error: "start date is required" }).refine(isDateFormat, { message: "the date must be in 0000-00-00 format" }),
         endDate: z.string({ required_error: "end date is required" }).refine(isDateFormat, { message: "the date must be in 0000-00-00 format" }),
-        startTime: z.string({ required_error: "start time is required" }).refine(isTimeFormat, { message: "the time must be in 00-00 format" }),
-        endTime: z.string({ required_error: "end time is required" }).refine(isTimeFormat, { message: "the time must be in 00-00 format" })
+        startTime: z.string({ required_error: "start time is required" }).refine((value: string) => isValidTime(value), { message: "the time must be in 00:00 format" }),
+        endTime: z.string({ required_error: "end time is required" }).refine((value: string) => isValidTime(value), { message: "the time must be in 00:00 format" })
     })
 
     const result = schemaZod.safeParse(reservation);
@@ -45,12 +56,9 @@ export function reservationUpdateStatusValidateZod(reservationStatus: Reservatio
 }
 
 export function reservationUpdateDateValidateZod(reservationDate: ReservationDateValidate) {
-    const isDateFormat = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
-    const isTimeFormat = (value) => /^\d{2}:\d{2}$/.test(value);
-
     const schemaZod = z.object({
         endDate: z.string({ required_error: "end date is required" }).refine(isDateFormat, { message: "the date must be in 0000-00-00 format" }),
-        endTime: z.string({ required_error: "end time is required" }).refine(isTimeFormat, { message: "the time must be in 00-00 format" })
+        endTime: z.string({ required_error: "end time is required" }).refine((value: string) => isValidTime(value), { message: "the time must be in 00:00 format" })
     })
 
     const result = schemaZod.safeParse(reservationDate);
