@@ -49,7 +49,6 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			const latitude = 12.3456
 			const longitude = 78.9012
 			const pricePerHour = 100
-			const disponibility = true
 			const description = "Spacious parking spot in a central location"
 			const type = ParkingSpaceType.Moto
 			const ownerId = "1dc092e1-819b-4a24-b373-7fd6c5fd8601"
@@ -62,7 +61,6 @@ describe("Gerenciador de vagas de estacionamento", () => {
 					latitude,
 					longitude,
 					pricePerHour,
-					disponibility,
 					description,
 					type,
 					ownerId
@@ -79,10 +77,12 @@ describe("Gerenciador de vagas de estacionamento", () => {
 				description: "Spacious parking spot in a central location",
 				ownerId: "1dc092e1-819b-4a24-b373-7fd6c5fd8601"
 			}
+
+			prismaMock.parkingSpace.findFirst.mockResolvedValue(null)
 			
 			prismaMock.parkingSpace.create.mockResolvedValue(parkingSpaceMock)
 
-			const parkingSpace = await gerenciador.create({pictures, latitude, longitude, pricePerHour, disponibility, description, type, ownerId})
+			const parkingSpace = await gerenciador.create({pictures, latitude, longitude, pricePerHour, description, type, ownerId})
 
 			expect(parkingSpace).toEqual(parkingSpaceMock)
 			expect(parkingSpaceValidateZod).toHaveBeenCalledTimes(1)
@@ -132,7 +132,7 @@ describe("Gerenciador de vagas de estacionamento", () => {
 
 			const id = "3b4fea6d-8257-4d8d-baf1-3ea03b907ac5"
 
-			prismaMock.parkingSpace.findUniqueOrThrow.mockResolvedValue(parkingSpaceMock)
+			prismaMock.parkingSpace.findUnique.mockResolvedValue(parkingSpaceMock)
 
 			const parkingSpace = await gerenciador.detail(id)
 
@@ -180,7 +180,83 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			prismaMock.owner.findUnique.mockResolvedValue({ userId, pixKey: "fkjakfjajfkah"})
 			prismaMock.parkingSpace.findUnique.mockResolvedValue(null)
 
-			await expect(gerenciador.delete(id, userId)).rejects.toEqual(new Error("parking space doens't exists"))
+			await expect(gerenciador.detail(id)).rejects.toEqual(new Error("parking space doens't exists"))
+		})
+
+		test("Usuário que não é proprietário deleta vaga de estacionamento", async () => {
+			const userId = "be40dbb9-1121-45fb-8790-056e7e056eb3"
+			const id = "6f5b32af-7f55-4249-8788-6a8b7651272d"
+			
+			prismaMock.owner.findUnique.mockResolvedValue(null)
+			await expect(gerenciador.delete(id, userId)).rejects.toEqual(new Error("user is not owner type"))
+		})
+
+		test("Registrar vaga de estacionamento em localização conflitante", async () => {
+			const content = "Conteúdo do arquivo fake"
+			const stream = Readable.from(content)
+
+			const picture1: Express.Multer.File = {
+            	fieldname: "file",
+            	originalname: "fakeFile.txt",
+            	encoding: "7bit",
+            	mimetype: "text/plain",
+            	buffer: Buffer.from(content),
+            	size: Buffer.byteLength(content),
+            	destination: "", // (opcional) Diretório onde o arquivo foi armazenado
+            	filename: "fakeFile.txt", // Nome do arquivo
+            	path: "caminho/fakeFile.txt", // Caminho do arquivo
+            	stream, // Incluindo o stream no objeto FakeFile
+			}
+
+			const picture2: Express.Multer.File = {
+            	fieldname: "file",
+            	originalname: "fakeFile.txt",
+            	encoding: "7bit",
+            	mimetype: "text/plain",
+            	buffer: Buffer.from(content),
+            	size: Buffer.byteLength(content),
+            	destination: "", // (opcional) Diretório onde o arquivo foi armazenado
+            	filename: "fakeFile.txt", // Nome do arquivo
+            	path: "caminho/fakeFile.txt", // Caminho do arquivo
+            	stream, // Incluindo o stream no objeto FakeFile
+			}
+            
+			const pictures: Express.Multer.File[] = [picture1, picture2]
+			const latitude = 12.3456
+			const longitude = 78.9012
+			const pricePerHour = 100
+			const description = "Spacious parking spot in a central location"
+			const type = ParkingSpaceType.Moto
+			const ownerId = "1dc092e1-819b-4a24-b373-7fd6c5fd8601"
+
+			prismaMock.owner.findUnique.mockResolvedValue({ userId: ownerId, pixKey: "kjfaj28f8hak" })
+
+			const parkingSpaceValidateZod = jest.spyOn(validate, "parkingSpaceValidateZod").mockReturnValue({
+				success: true,
+				data: {
+					latitude,
+					longitude,
+					pricePerHour,
+					description,
+					type,
+					ownerId
+				},
+			})
+
+			const parkingSpaceMock = {
+				id: "3b4fea6d-8257-4d8d-baf1-3ea03b907ac5",
+				latitude: 12.3456,
+				longitude: 78.9012,
+				type: ParkingSpaceType.Moto,
+				pricePerHour: 10,
+				disponibility: true,
+				description: "Spacious parking spot in a central location",
+				ownerId: "1dc092e1-819b-4a24-b373-7fd6c5fd8601"
+			}
+
+			prismaMock.parkingSpace.findFirst.mockResolvedValue(parkingSpaceMock)
+			await expect(gerenciador.create({pictures, latitude, longitude, pricePerHour, description, type, ownerId})).rejects.toEqual(new Error("parking space at this location already exists"))
+			expect(parkingSpaceValidateZod).toHaveBeenCalledTimes(1)
 		})
 	})
 })
