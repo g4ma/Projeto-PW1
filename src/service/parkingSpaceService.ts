@@ -45,8 +45,8 @@ export class ParkingSpaceService{
 
 			const parkingSpace = await prisma.parkingSpace.findFirst({
 				where:{
-					longitude,
-					latitude
+					longitude: parseFloat(longitude.toString()),
+					latitude: parseFloat(latitude.toString())
 				}
 			})
 
