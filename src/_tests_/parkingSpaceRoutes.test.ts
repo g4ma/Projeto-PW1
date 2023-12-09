@@ -1,49 +1,30 @@
-import parkingSpaceRoutes from "../routes/parkingSpaceRoutes"
-import { UserService } from "../service/userService"
-import AuthService from "../service/authService"
 import request from "supertest"
 import * as fs from "fs"
+
+import parkingSpaceRoutes from "../routes/parkingSpaceRoutes"
 import routesUser from "../routes/userRoutes"
 import authRoutes from "../routes/authRoutes"
+import { prisma } from "../database/prisma"
 
 describe("Vagas de estacionamento", () => {
 	let token: string
 
-	beforeEach(async () => {
-		// await connection.migrate.rollback()
-		// await connection.migrate.latest()
-	})
-
 	afterAll( async () => {
-		// await connection.destroy()
+		await prisma.parkingSpace.deleteMany()
+		await prisma.user.deleteMany()
 	})
 
-	beforeAll(async () => {
-		// const newUser = {
-		// 	id: "076b915b-c7ee-4910-8f57-8d4e5caf3800",
-		// 	name: "Maria da Silva",
-		// 	email: "mariasilva@gmail.com",
-		// 	phoneNumber: "(83)991684630",
-		// 	password: "Senha2023"
-		// }
+	beforeEach(async () => {
+		const newUser = {
+			name: "Maria da Silva",
+			email: "mariasilva@gmail.com",
+			phoneNumber: "(83)991684630",
+			password: "Senha2023"
+		}
 
-		// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFhMzJlNTAzLThkNWQtNDIyYi1iOWQwLWI0MmMzZTI2NzI4NyIsImlhdCI6MTcwMTcyOTExOCwiZXhwIjoxNzAxNzMyNzE4fQ.JCoDulUYp9vL1odFaWWbBxCRPuotmhqx1CpZjF5lhqo"
-		// const authService = new AuthService()
-		// const userService = new UserService()
-		
-		// jest.spyOn(userService, "create").mockResolvedValue(newUser)
-		// jest.spyOn(authService, "login").mockResolvedValue({token: token})
-
-		// const newUser = {
-		// 	name: "Maria da Silva",
-		// 	email: "mariasilva@gmail.com",
-		// 	phoneNumber: "(83)991684630",
-		// 	password: "Senha2023"
-		// }
-
-		// await request(routesUser).post("/users").send(newUser)
-		// const tokenResponse = await request(authRoutes).post("/login").send({name: newUser.name, password: newUser.password})
-		// token = tokenResponse.body.token
+		await request(routesUser).post("/users").send(newUser)
+		const tokenResponse = await request(authRoutes).post("/login").send({name: newUser.name, password: newUser.password})
+		token = tokenResponse.body.token
 	})
 
 	test("cadastro de vaga de estacionamento com todas as informações corretas", async () => {
@@ -69,9 +50,9 @@ describe("Vagas de estacionamento", () => {
 		expect({
 			latitude: formData.get("latitude"),
 			longitude: formData.get("longitude"),
-			description: formData.get("getdescription"),
-			disponibility: formData.get("getdisponibility"),
-			pricePerHour: formData.get("getpricePerHour"),
+			description: formData.get("description"),
+			disponibility: formData.get("disponibility"),
+			pricePerHour: formData.get("pricePerHour"),
 			type: formData.get("type")
 		}).toEqual({
 			latitude: receivedParkingSpace.latitude,

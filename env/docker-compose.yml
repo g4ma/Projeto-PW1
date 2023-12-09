@@ -25,3 +25,10 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+  tests:
+    container_name: tests
+    image: pw1/tests
+    build: ./dbtests
+    ports:
+     - "5433:5432"
+    restart: always

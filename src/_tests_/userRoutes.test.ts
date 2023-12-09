@@ -1,17 +1,12 @@
 import routesUser from "../routes/userRoutes"
 
 import request from "supertest"
-// import { prisma } from "../database/prisma"
+import { prisma } from "../database/prisma"
 
 describe("Users", () => {
 
-	beforeEach(async () => {
-		// await connection.migrate.rollback()
-		// await connection.migrate.latest()
-	})
-
 	afterAll( async () => {
-		// await connection.destroy()
+		await prisma.user.deleteMany()
 	})
 
 	test("cadastro de usuário com todas as informações corretas", async () => {
