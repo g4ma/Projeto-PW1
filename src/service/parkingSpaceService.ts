@@ -25,16 +25,6 @@ export class ParkingSpaceService{
 
 	async create({pictures, latitude, longitude, pricePerHour, description, type, ownerId}: Params){
 		try{
-			const owner = await prisma.owner.findUnique({
-				where: {
-					userId: ownerId
-				}
-			})
-
-			if(!owner){
-				throw new ParkingSpaceError("user is not owner type")
-			}
-
 			const result = parkingSpaceValidateZod({latitude, longitude, pricePerHour, description, type, ownerId})
 			
 			if (!result.success) {
@@ -115,17 +105,7 @@ export class ParkingSpaceService{
 
 	async update({id, userId, disponibility, description, pricePerHour}: ParamsUpdate){
 		try{
-			const owner = await prisma.owner.findUnique({
-				where: {
-					userId
-				}
-			})
-
-			if(!owner){
-				throw new ParkingSpaceError("user is not owner type")
-			}
-
-			const ownerId = owner.userId
+			const ownerId = userId
 
 			const result = parkingSpaceValidateZodUpd({pricePerHour, disponibility, description, ownerId})
 			
@@ -168,21 +148,10 @@ export class ParkingSpaceService{
 
 	async delete(id: string, userId: string){
 		try{
-			const owner = await prisma.owner.findUnique({
-				where: {
-					userId
-				}
-			})
-
-			if(!owner){
-				throw new ParkingSpaceError("user is not owner type")
-			}
-
-
 			const parkingSpace = await prisma.parkingSpace.findUnique({
 				where: {
 					id,
-					ownerId: owner.userId
+					ownerId: userId
 				}
 			})
 
