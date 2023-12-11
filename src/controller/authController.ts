@@ -1,5 +1,5 @@
-import AuthService from '../service/authService'
-import { Request, Response } from 'express'
+import AuthService from "../service/authService"
+import { Request, Response } from "express"
 
 const authService = new AuthService
 
@@ -10,6 +10,6 @@ export class AuthControler{
 			const result = await authService.login({email, password})
 			res.status(200).json(result)
 		} catch (error: unknown) {
-			res.status(400).json({ error: 'something went wrong' })
+			res.status(400).json({ error: "something went wrong" })
 		}
 	}}
