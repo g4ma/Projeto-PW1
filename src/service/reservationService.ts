@@ -34,13 +34,13 @@ export class ReservationService {
 
         const checkReservationAvailability = new CheckReservationAvailability();
 
-        const isDateValid = checkReservationAvailability.verifyDate(startDate,startTime,endDate,endTime);
+        const isDateValid = checkReservationAvailability.verifyDate({startDate,startTime,endDate,endTime});
 
         if(!isDateValid){
             throw new Error("dates invalid");
         }
 
-        const isAvaiable = await checkReservationAvailability.verifyAvailability(parkingSpaceId, startDate, startTime, endDate, endTime);
+        const isAvaiable = await checkReservationAvailability.verifyAvailability({parkingSpaceId, startDate, startTime, endDate, endTime});
 
         if (!isAvaiable) {
             throw new Error("parking space already ocupied");
@@ -148,22 +148,27 @@ export class ReservationService {
                 id: reservationId
             }
         })
-
         if (!reservation) {
             throw new Error("reservation does not exist");
         }
 
-        if (reservation.userId != userId) {
+        const parkingSpace = await prisma.parkingSpace.findUnique({
+            where:{
+                id: reservation.parkingSpaceId
+            }
+        })
+        if (parkingSpace?.ownerId != userId) {
             throw new Error("user can not update this reservation");
         }
 
-        const result = reservationUpdateStatusValidateZod({ newStatus });
 
+        const result = reservationUpdateStatusValidateZod({ newStatus });
         if (!result.success) {
             const formattedError = result.error.format();
             console.log(formattedError);
             throw new Error(...formattedError._errors);
         }
+
 
         const updatedStatusPayment = await prisma.reservation.update({
             where: {
@@ -184,51 +189,39 @@ export class ReservationService {
                 id: reservationId
             }
         });
-
         if (!reservation) {
             throw new Error("reservation does not exist");
         }
-
         if (reservation.userId != userId) {
-            throw new Error("user can not delete this reservation");
+            throw new Error("user can not update this reservation");
         }
 
         const result = reservationUpdateDateValidateZod({ endDate, endTime });
-
         if (!result.success) {
             const formattedError = result.error.format();
             console.log(formattedError);
             throw new Error(...formattedError._errors);
         }
 
+        const checkReservationAvailability = new CheckReservationAvailability();
+
+        const isUpdateValid = await checkReservationAvailability.checkUpdateAvailability({reservationId,endDate,endTime});
+
+        if(!isUpdateValid){
+            throw new Error("new end date has conflict with other reservation")
+        }
+
+        const isUpdateDateValid = await checkReservationAvailability.checkUpdateDateStatus({reservationId,endDate,endTime});
+
+        if(!isUpdateDateValid) {
+            throw new Error("invalid end time");
+        }
+
         const newEndDate = new Date(`${endDate}T${endTime}`);
         const oldEndDate = new Date(`${reservation.endDate}T${reservation.endTime}`);
 
-        if (newEndDate === oldEndDate) {
+        if (newEndDate.getTime() === oldEndDate.getTime()) {
             throw new Error("new end date is the same");
-        }
-
-        if (oldEndDate > newEndDate) {
-
-            if (reservation.paymentStatus === ReservationPaymentStatus.Pendente) {
-
-                const updatedReservation = await prisma.reservation.update({
-                    where: {
-                        id: reservationId
-                    },
-                    data: {
-                        endTime,
-                        endDate,
-                        paymentStatus: ReservationPaymentStatus.Pendente
-                    }
-                });
-
-                return updatedReservation;
-            }
-
-            else {
-                throw new Error("invalid end time");
-            }
         }
 
         const updatedReservation = prisma.reservation.update({
