@@ -1,7 +1,7 @@
 import { ParkingSpaceType } from "@prisma/client"
 import { prisma } from "../database/prisma"
 import { parkingSpaceValidateZod, parkingSpaceValidateZodUpd } from "../utils/parkingSpaceValidateZod"
-import { ParkingSpaceError } from "../utils/parkingSpaceError"
+import { ParkingSpaceError, ParkingSpaceValuesError } from "../utils/parkingSpaceError"
 
 type Params = {
 	pictures: Express.Multer.File[]
@@ -28,9 +28,7 @@ export class ParkingSpaceService{
 			const result = parkingSpaceValidateZod({latitude, longitude, pricePerHour, description, type, ownerId})
 			
 			if (!result.success) {
-				const formattedError = result.error.format()
-				console.log(formattedError)
-				throw new Error(...formattedError._errors)
+				throw new ParkingSpaceValuesError(result.error.issues)
 			}
 
 			const parkingSpace = await prisma.parkingSpace.findFirst({
@@ -110,9 +108,7 @@ export class ParkingSpaceService{
 			const result = parkingSpaceValidateZodUpd({pricePerHour, disponibility, description, ownerId})
 			
 			if (!result.success) {
-				const formattedError = result.error.format()
-				console.log(formattedError)
-				throw new Error(...formattedError._errors)
+				throw new ParkingSpaceValuesError(result.error.issues)
 			}
 
 			const parkingSpace = await prisma.parkingSpace.findUnique({

@@ -14,7 +14,7 @@ export class ParkingSpaceController{
 			return res.status(201).json(parkingSpace)
 		} catch(error){
 			console.log(error)
-			return res.status(400).json({ error: error.message})
+			return res.status(400).json(error.issues ?? { error: error.message})
 		}
 	}
 
@@ -46,7 +46,7 @@ export class ParkingSpaceController{
 			const parkingSpace = await parkingSpaceService.update({id, userId, disponibility, description, pricePerHour})
 			return res.status(200).json(parkingSpace)
 		} catch(error){
-			return res.status(400).json({ error: error.message })
+			return res.status(400).json(error.issues ?? { error: error.message })
 		}
 	}
 

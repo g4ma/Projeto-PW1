@@ -21,7 +21,7 @@ export function parkingSpaceValidateZod(parkingSpace: ParkingSpaceParamsValidate
 		type: z.nativeEnum(ParkingSpaceType),
 		latitude: z.coerce.number({required_error: "latitude is required"}),
 		longitude: z.coerce.number({required_error: "longitude is required"}),
-		pricePerHour: z.coerce.number({required_error: "pricePerHour is required"}),
+		pricePerHour: z.coerce.number({required_error: "pricePerHour is required"}).positive(),
 		description: z.string({required_error:"description is required"}),
 		ownerId: z.string(),
 	})

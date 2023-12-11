@@ -36,7 +36,7 @@ model ParkingSpace {
   latitude      Float
   longitude     Float
   pricePerHour  Float
-  disponibility Boolean          @default(false)
+  disponibility Boolean          @default(true)
   description   String           @db.VarChar(50)
   type          ParkingSpaceType
 
