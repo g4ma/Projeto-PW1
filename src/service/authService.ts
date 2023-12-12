@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken"
+import jwt, { Secret } from "jsonwebtoken"
 import {encrypt} from "../utils/security"
 import DotEnv from "dotenv"
 import { prisma } from "../database/prisma"
@@ -10,7 +10,7 @@ type ParamsLogin = {
   password: string
 }
 
-const { SECRET } = process.env 
+const SECRET = process.env.SECRET as Secret 
 
 class AuthService{
 	async login({email, password}: ParamsLogin){

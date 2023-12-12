@@ -4,6 +4,7 @@ export interface Reservation{
   parkingSpaceId: string
   startTime:      string
   endTime:        string
-  date:           string
+  startDate:      string
+  endDate:        string
   paymentStatus:  string
 }
