@@ -84,7 +84,7 @@ describe("Gerenciador de vagas de estacionamento", () => {
 
 	describe("Fluxo de exceção", () => {
 
-		test("Atualizar reserva de vaga de estacionamento com data inválida", async () => {
+		test("Atualizar reserva de vaga de estacionamento com data conflitante", async () => {
 			const reservation = { 
 				id: "4c2d0c18-d696-4bf7-a482-a9b4ce7a6ae5",
 				userId: "ea70f261-08c4-44f9-b993-8ad672310136",
@@ -111,7 +111,10 @@ describe("Gerenciador de vagas de estacionamento", () => {
 				},
 			})
 
-			await expect(gerenciador.updateReservationDate({userId, reservationId, endDate, endTime})).rejects.toEqual(new Error("invalid end time"))
+			const checkReservationAvailability = new CheckReservationAvailability()
+			jest.spyOn(checkReservationAvailability, "checkUpdateAvailability").mockReturnValue(Promise.resolve(false))
+
+			await expect(gerenciador.updateReservationDate({userId, reservationId, endDate, endTime})).rejects.toEqual(new Error("new end date has conflict with other reservation"))
 			expect(reservationUpdateDateValidateZod).toHaveBeenCalledTimes(1)
 		})
 
