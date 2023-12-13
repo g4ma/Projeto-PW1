@@ -43,7 +43,7 @@ export class UserController {
 			return res.status(403).json("erro")
 		}
 		const result = await userService.delete({ id })
-		await banToken(req.headers["authorization"])
+		await banToken(req.headers["authorization"] as string)
 		res.status(200).json(result)
 	}
 	async detail(req: Request, res: Response){

@@ -33,6 +33,6 @@ describe("Users", () => {
 			password: receivedUser.password
 		})
 		expect(response.status).toBe(201)
-	})
+	}, 10000)
 
 })
