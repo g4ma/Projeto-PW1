@@ -1,7 +1,6 @@
-import routesUser from "../routes/userRoutes"
-
 import request from "supertest"
 import { prisma } from "../database/prisma"
+import app from "../app"
 
 describe("Users", () => {
 
@@ -13,11 +12,11 @@ describe("Users", () => {
 		const newUser = {
 			name: "Maria da Silva",
 			email: "mariasilva@gmail.com",
-			phoneNumber: "(83)991684630",
+			phoneNumber: "(83)99168-4630",
 			password: "Senha2023"
 		}
 
-		const response = await request(routesUser).post("/users").set("Content-type", "application/json").send({name: newUser.name, email: newUser.email, phoneNumber: newUser.phoneNumber, password: newUser.password})
+		const response = await request(app).post("/users").set("Content-type", "application/json").send({name: newUser.name, email: newUser.email, phoneNumber: newUser.phoneNumber, password: newUser.password})
 
 		const receivedUser = response.body 
 

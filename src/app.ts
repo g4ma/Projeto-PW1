@@ -10,6 +10,11 @@ app.use(express.json())
 app.use(cors())
 app.use(router)
 
-app.listen(process.env.SERVER_PORT, ()=>{
-	console.log(`servidor rodando na porta ${process.env.SERVER_PORT}`)
-})
+export default app
+
+if (process.env.NODE_ENV !== "test"){
+	app.listen(process.env.SERVER_PORT, ()=>{
+		console.log(`servidor rodando na porta ${process.env.SERVER_PORT}`)
+	})
+}
+
