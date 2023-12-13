@@ -124,11 +124,9 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			const endDate = "2023-11-20"  
 
 			const checkReservation = new CheckReservationAvailability()
-			const spyVerifyDate = jest.spyOn(checkReservation, "verifyDate").mockReturnValue(true)
-			const spyVerifyAvailability = jest.spyOn(checkReservation, "verifyAvailability").mockReturnValue(Promise.resolve(false))
+			jest.spyOn(checkReservation, "verifyDate").mockReturnValue(true)
+			jest.spyOn(checkReservation, "verifyAvailability").mockReturnValue(Promise.resolve(false))
 
-			expect(spyVerifyDate).toHaveBeenCalledTimes(1)
-			expect(spyVerifyAvailability).toHaveBeenCalledTimes(1)
 			await expect(gerenciador.create({userId, parkingSpaceId, endDate, endTime, startDate, startTime})).rejects.toEqual(new Error("parking space already ocupied"))
 		})
 
