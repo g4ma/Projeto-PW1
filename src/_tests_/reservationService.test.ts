@@ -129,6 +129,50 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			
 			expect(deletedReservation).toBe(reservation)	
 		})
+
+		test("Atualizar reserva de vaga de estacionamento", async()=>{
+
+			const reservation = {
+				id: "05c57c12-9b2b-47a3-a2dd-b42c031c5028",
+				userId: "b3e29220-e5e0-4339-b612-0b85e3ef4ceb",
+				parkingSpaceId: "d3d650f9-898f-4331-917a-c06ead6a9024",
+				startTime: "10:20",
+				endTime: "11:40",
+				startDate: "19/11/2023",   
+				endDate: "19/11/2023",  
+				paymentStatus: ReservationPaymentStatus.Aprovado
+			}
+			
+			const { id, userId } = reservation
+
+			const reservationId = id
+			const endDate = "2023-11-19"
+			const endTime = "14:00"
+			
+
+			prismaMock.reservation.findUnique.mockResolvedValue(reservation)
+
+			const reservationUpdateDateValidateZod = jest.spyOn(validate, "reservationUpdateDateValidateZod").mockReturnValue({
+				success: true,
+				data: {
+					endTime: "14:00",
+					endDate: "19/11/2023",  
+				},
+			})
+
+			const checkUpdateAvailability = jest.spyOn(CheckReservationAvailability.prototype, "checkUpdateAvailability").mockResolvedValue(true)
+			const checkUpdateDateStatus = jest.spyOn(CheckReservationAvailability.prototype, "checkUpdateDateStatus").mockResolvedValue(true)
+
+			prismaMock.reservation.update.mockResolvedValue(reservation)
+
+			const checkUpdateAvailabilityMock = jest.spyOn(CheckReservationAvailability.prototype, "checkUpdateAvailability").mockResolvedValue(true)
+
+			await expect(gerenciador.updateReservationDate({userId, reservationId, endDate, endTime})).resolves.toEqual(reservation)
+			expect(reservationUpdateDateValidateZod).toHaveBeenCalledTimes(1)
+			expect(checkUpdateAvailability).toHaveBeenCalledTimes(1)
+			expect(checkUpdateDateStatus).toHaveBeenCalledTimes(1)
+			expect(checkUpdateAvailabilityMock).toHaveBeenCalledTimes(1)
+		})
 	})
 
 	describe("Fluxo de exceção", () => {
