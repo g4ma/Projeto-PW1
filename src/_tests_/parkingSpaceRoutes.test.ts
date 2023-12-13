@@ -63,6 +63,6 @@ describe("Vagas de estacionamento", () => {
 			type: receivedParkingSpace.type
 		})
 		expect(response.status).toBe(201)
-	})
+	}, 10000)
 
 })

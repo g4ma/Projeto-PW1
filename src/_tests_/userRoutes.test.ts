@@ -17,7 +17,7 @@ describe("Users", () => {
 			password: "Senha2023"
 		}
 
-		const response = await request(routesUser).post("/users").send(newUser)
+		const response = await request(routesUser).post("/users").set("Content-type", "application/json").send({name: newUser.name, email: newUser.email, phoneNumber: newUser.phoneNumber, password: newUser.password})
 
 		const receivedUser = response.body 
 
