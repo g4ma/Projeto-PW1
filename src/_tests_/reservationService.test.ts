@@ -3,7 +3,6 @@ import { prismaMock } from "./singleton"
 import { ReservationService } from "../service/reservationService"
 import * as validate from "../utils/reservationValidateZod"
 import { ReservationPaymentStatus } from "@prisma/client"
-import * as validateReservation from "../utils/checkReservationAvailability"
 import { CheckReservationAvailability } from "../utils/checkReservationAvailability"
 
 
@@ -148,7 +147,7 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			const { id, userId } = reservation
 
 			const reservationId = id
-			const endDate = "2023-11-19"
+			const endDate = "2023-11-20"
 			const endTime = "14:00"
 
 			prismaMock.reservation.findUnique.mockResolvedValue(reservation)
@@ -160,9 +159,8 @@ describe("Gerenciador de vagas de estacionamento", () => {
 				},
 			})
 
-			const checkReservationAvailability = new validateReservation.CheckReservationAvailability()
-			jest.spyOn(checkReservationAvailability, "checkUpdateAvailability").mockReturnValue(Promise.resolve(false))
-
+			jest.spyOn(CheckReservationAvailability.prototype, "checkUpdateAvailability").mockReturnValue(Promise.resolve(false))
+			
 			await expect(gerenciador.updateReservationDate({userId, reservationId, endDate, endTime})).rejects.toEqual(new Error("new end date has conflict with other reservation"))
 			expect(reservationUpdateDateValidateZod).toHaveBeenCalledTimes(1)
 		})
@@ -175,10 +173,9 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			const startDate = "2023-11-20"   
 			const endDate = "2023-11-20"  
 
-			const checkReservation = new validateReservation.CheckReservationAvailability()
-			jest.spyOn(checkReservation, "verifyDate").mockReturnValue(true)
-			jest.spyOn(checkReservation, "verifyAvailability").mockReturnValue(Promise.resolve(false))
-
+			jest.spyOn(CheckReservationAvailability.prototype, "verifyDate").mockReturnValue(true)
+			jest.spyOn(CheckReservationAvailability.prototype, "verifyAvailability").mockReturnValue(Promise.resolve(false))
+			
 			await expect(gerenciador.create({userId, parkingSpaceId, endDate, endTime, startDate, startTime})).rejects.toEqual(new Error("parking space already ocupied"))
 		})
 
