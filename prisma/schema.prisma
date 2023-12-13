@@ -53,7 +53,8 @@ model Reservation {
   parkingSpaceId String                   @db.VarChar(36)
   startTime      String
   endTime        String
-  date           String
+  startDate      String
+  endDate        String
   paymentStatus  ReservationPaymentStatus @default(Pendente)
 
   parkingSpace ParkingSpace @relation(fields: [parkingSpaceId], references: [id])

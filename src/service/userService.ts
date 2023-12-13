@@ -1,4 +1,5 @@
 import { prisma } from "../database/prisma"
+import { AlreadyExistsError, PixKeyError, UserValuesError } from "../utils/errors"
 import { encrypt } from "../utils/security"
 import { userUpdateValidateZod, userCreateValidateZod, ownerValidateZod } from "../utils/userValidateZod"
 
@@ -21,9 +22,7 @@ export class UserService{
 	async create ({name, email, phoneNumber, password, pixKey}:Params){
 		const result = userCreateValidateZod({name, email, phoneNumber, password, pixKey})
 		if (!result.success) {
-			const formattedError = result.error.format()
-			console.log(formattedError)
-			throw new Error(...formattedError._errors)
+			throw new UserValuesError(result.error.issues)
 		}
 		const user = await prisma.user.findUnique({
 			where:{
@@ -31,7 +30,7 @@ export class UserService{
 			}
 		})
 		if(user !== null){
-			throw new Error("user already exists")
+			throw new AlreadyExistsError("user already exists")
 		}
 
 		const encryptedPassword = encrypt(password)
@@ -58,8 +57,7 @@ export class UserService{
 		try{
 			const result = userUpdateValidateZod({email, phoneNumber})
 			if (!result.success) {
-				const formattedError = result.error.format()
-				throw new Error(...formattedError._errors)
+				throw new UserValuesError(result.error.issues)
 			}
 			const userUpdate = await prisma.user.update({
 				where:{
@@ -72,11 +70,23 @@ export class UserService{
 			})
 			return userUpdate
 		}catch (err) {
-			console.log(err)
-			throw new Error()
+			console.error(err)
+			throw err
 		}
 	}
 	async delete({id} : ParamsUpdate){
+		const isOwner = await prisma.owner.findUnique({
+			where:{
+				userId: id
+			}
+		})
+		if(isOwner){
+			await prisma.owner.delete({
+				where:{
+					userId: id
+				}
+			})
+		}
 		const deletedUser = await prisma.user.delete({
 			where: {
 				id
@@ -107,19 +117,21 @@ export class UserService{
 	async upgrade({id, pixKey}: ParamsUpdate){
 		const result = ownerValidateZod({pixKey})
 		if (!result.success) {
-			const formattedError = result.error.format()
-			throw new Error(...formattedError._errors)
+			throw new PixKeyError(result.error.issues)
 		}
 		if(!id || !pixKey){
 			throw new Error("Invalid data")
 		} 
-		
-		const upgradedUser = await prisma.owner.create({
-			data:{
-				userId: id,
-				pixKey
-			},
-		})
-		return upgradedUser
+		try{
+			const upgradedUser = await prisma.owner.create({
+				data:{
+					userId: id,
+					pixKey
+				},
+			})
+			return upgradedUser
+		}catch(error: unknown){
+			throw new Error("User is already owner")
+		}
 	}
 }
