@@ -21,7 +21,7 @@ class AuthService{
 			}
 		})
 		if (user !== null){
-			const token = jwt.sign({id: user.id}, SECRET, {
+			const token = jwt.sign({id: user.id}, SECRET!, {
 				expiresIn: "1h"
 			})
 			return {token: token}
