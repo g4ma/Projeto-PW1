@@ -1,5 +1,5 @@
-import { prisma } from '../database/prisma';
-import { ReservationPaymentStatus } from '../model/reservationPaymentStatus';
+import { prisma } from "../database/prisma"
+import { ReservationPaymentStatus } from "../model/reservationPaymentStatus"
 
 type ParamsDate = {
     startDate?: string;
@@ -24,103 +24,103 @@ type ParamsAvailability = {
 
 export class CheckReservationAvailability {
 
-    verifyDate({ startDate, startTime, endDate, endTime }: ParamsDate) {
+	verifyDate({ startDate, startTime, endDate, endTime }: ParamsDate) {
 
-        const StartDate = new Date(`${startDate}T${startTime}`);
-        const EndDate = new Date(`${endDate}T${endTime}`);
+		const StartDate = new Date(`${startDate}T${startTime}`)
+		const EndDate = new Date(`${endDate}T${endTime}`)
 
-        if (StartDate > EndDate) {
-            return false;
-        }
+		if (StartDate > EndDate) {
+			return false
+		}
 
-        return true;
-    }
+		return true
+	}
 
-    async checkUpdateAvailability({ reservationId, endDate, endTime }: ParamsUpdate) {
+	async checkUpdateAvailability({ reservationId, endDate, endTime }: ParamsUpdate) {
 
-        const reservation = await prisma.reservation.findUnique({
-            where: {
-                id: reservationId
-            }
-        });
+		const reservation = await prisma.reservation.findUnique({
+			where: {
+				id: reservationId
+			}
+		})
 
-        const reservations = await prisma.reservation.findMany({
-            where: {
-                parkingSpaceId: reservation?.parkingSpaceId
-            }
-        });
+		const reservations = await prisma.reservation.findMany({
+			where: {
+				parkingSpaceId: reservation?.parkingSpaceId
+			}
+		})
 
-        const newEndDate = new Date(`${endDate}T${endTime}`);
+		const newEndDate = new Date(`${endDate}T${endTime}`)
 
-        for (const othersReservations of reservations) {
+		for (const othersReservations of reservations) {
 
-            if (othersReservations.id != reservation?.id) {
-                const existentStartDate = new Date(`${othersReservations.startDate}T${othersReservations.startTime}`);
-                const existentEndDate = new Date(`${othersReservations.endDate}T${othersReservations.endTime}`);
+			if (othersReservations.id != reservation?.id) {
+				const existentStartDate = new Date(`${othersReservations.startDate}T${othersReservations.startTime}`)
+				const existentEndDate = new Date(`${othersReservations.endDate}T${othersReservations.endTime}`)
 
-                if ((newEndDate > existentStartDate && newEndDate <= existentEndDate)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
+				if ((newEndDate > existentStartDate && newEndDate <= existentEndDate)) {
+					return false
+				}
+			}
+		}
+		return true
+	}
 
-    async checkUpdateDateStatus({ reservationId, endDate, endTime }: ParamsUpdate) {
+	async checkUpdateDateStatus({ reservationId, endDate, endTime }: ParamsUpdate) {
 
-        const reservation = await prisma.reservation.findUnique({
-            where: {
-                id: reservationId
-            }
-        });
+		const reservation = await prisma.reservation.findUnique({
+			where: {
+				id: reservationId
+			}
+		})
 
-        const newEndDate = new Date(`${endDate}T${endTime}`);
-        const oldEndDate = new Date(`${reservation?.endDate}T${reservation?.endTime}`);
+		const newEndDate = new Date(`${endDate}T${endTime}`)
+		const oldEndDate = new Date(`${reservation?.endDate}T${reservation?.endTime}`)
 
-        if (newEndDate < oldEndDate) {
-            if (reservation?.paymentStatus != ReservationPaymentStatus.Pendente)
-                return false;
-        }
+		if (newEndDate < oldEndDate) {
+			if (reservation?.paymentStatus != ReservationPaymentStatus.Pendente)
+				return false
+		}
 
-        const oldStartDate = new Date(`${reservation?.startDate}T${reservation?.startTime}`);
+		const oldStartDate = new Date(`${reservation?.startDate}T${reservation?.startTime}`)
 
-        if (oldStartDate > newEndDate) {
-            return false;
-        }
+		if (oldStartDate > newEndDate) {
+			return false
+		}
 
-        return true;
+		return true
 
-    }
+	}
 
-    async verifyAvailability({ parkingSpaceId, startDate, startTime, endDate, endTime }: ParamsAvailability) {
+	async verifyAvailability({ parkingSpaceId, startDate, startTime, endDate, endTime }: ParamsAvailability) {
 
-        const reservations = await prisma.reservation.findMany({
-            where: {
-                parkingSpaceId
-            }
-        });
+		const reservations = await prisma.reservation.findMany({
+			where: {
+				parkingSpaceId
+			}
+		})
 
-        if (!reservations) {
-            return true;
-        }
+		if (!reservations) {
+			return true
+		}
 
-        const newStartDate = new Date(`${startDate}T${startTime}`);
-        const newEndDate = new Date(`${endDate}T${endTime}`);
+		const newStartDate = new Date(`${startDate}T${startTime}`)
+		const newEndDate = new Date(`${endDate}T${endTime}`)
 
 
-        for (const reservation of reservations) {
+		for (const reservation of reservations) {
 
-            const existentStartDate = new Date(`${reservation.startDate}T${reservation.startTime}`);
-            const existentEndDate = new Date(`${reservation.endDate}T${reservation.endTime}`);
+			const existentStartDate = new Date(`${reservation.startDate}T${reservation.startTime}`)
+			const existentEndDate = new Date(`${reservation.endDate}T${reservation.endTime}`)
 
-            if (
-                (newStartDate >= existentStartDate && newStartDate < existentEndDate) ||
+			if (
+				(newStartDate >= existentStartDate && newStartDate < existentEndDate) ||
                 (newEndDate > existentStartDate && newEndDate <= existentEndDate) ||
                 (newStartDate <= existentStartDate && newEndDate >= existentEndDate)
-            ) {
-                return false;
-            }
-        }
-        return true;
-    }
+			) {
+				return false
+			}
+		}
+		return true
+	}
 }

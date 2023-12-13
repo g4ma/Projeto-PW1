@@ -3,7 +3,10 @@ import { prismaMock } from "./singleton"
 import { ReservationService } from "../service/reservationService"
 import * as validate from "../utils/reservationValidateZod"
 import { ReservationPaymentStatus } from "@prisma/client"
+import * as validateReservation from "../utils/checkReservationAvailability"
 import { CheckReservationAvailability } from "../utils/checkReservationAvailability"
+
+
 
 describe("Gerenciador de vagas de estacionamento", () => {
 	let gerenciador: ReservationService
@@ -14,6 +17,52 @@ describe("Gerenciador de vagas de estacionamento", () => {
 	})
     
 	describe("Fluxo normal", () => {
+
+		test("Registro de reserva", async ()=>{
+			const reservationMock = {
+				id: "05c57c12-9b2b-47a3-a2dd-b42c031c5028",
+				userId: "b3e29220-e5e0-4339-b612-0b85e3ef4ceb",
+				parkingSpaceId: "d3d650f9-898f-4331-917a-c06ead6a9024",
+				startTime: "10:20",
+				endTime: "11:40",
+				startDate: "19/11/2023",   
+				endDate: "19/11/2023",  
+				paymentStatus: ReservationPaymentStatus.Aprovado
+			}
+
+			const verifyDate = jest.spyOn(CheckReservationAvailability.prototype, "verifyDate").mockReturnValue(true)
+			const verifyAvailability = jest.spyOn(CheckReservationAvailability.prototype, "verifyAvailability").mockResolvedValue(true)
+
+
+			const reservationValidateZod = jest.spyOn(validate, "reservationCreateValidateZod").mockReturnValue({
+				success: true,
+				data: {
+					parkingSpaceId: "d3d650f9-898f-4331-917a-c06ead6a9024",
+					startTime: "10:20",
+					endTime: "11:40",
+					startDate: "19/11/2023",   
+					endDate: "19/11/2023", 
+				},
+			})
+
+			prismaMock.reservation.create.mockResolvedValue(reservationMock)
+      
+			await expect(gerenciador.create({
+				userId: "b3e29220-e5e0-4339-b612-0b85e3ef4ceb",
+				parkingSpaceId: "d3d650f9-898f-4331-917a-c06ead6a9024",
+				startTime: "10:20",
+				endTime: "11:40",
+				startDate: "19/11/2023",   
+				endDate: "19/11/2023"
+			})).resolves.toEqual(reservationMock)
+
+
+			expect(verifyDate).toHaveBeenCalledTimes(1)
+			expect(verifyAvailability).toHaveBeenCalledTimes(1)
+			expect(reservationValidateZod).toHaveBeenCalledTimes(1)
+			expect(prismaMock.reservation.create).toHaveBeenCalledTimes(1)
+		
+		})
 
 		test("Listar reservas de vagas de estacionamento de um usuário proprietário", async () => {
 			const userId = "f0b3d8c8-d739-4998-a107-d82297356a7f"
@@ -111,7 +160,7 @@ describe("Gerenciador de vagas de estacionamento", () => {
 				},
 			})
 
-			const checkReservationAvailability = new CheckReservationAvailability()
+			const checkReservationAvailability = new validateReservation.CheckReservationAvailability()
 			jest.spyOn(checkReservationAvailability, "checkUpdateAvailability").mockReturnValue(Promise.resolve(false))
 
 			await expect(gerenciador.updateReservationDate({userId, reservationId, endDate, endTime})).rejects.toEqual(new Error("new end date has conflict with other reservation"))
@@ -126,7 +175,7 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			const startDate = "2023-11-20"   
 			const endDate = "2023-11-20"  
 
-			const checkReservation = new CheckReservationAvailability()
+			const checkReservation = new validateReservation.CheckReservationAvailability()
 			jest.spyOn(checkReservation, "verifyDate").mockReturnValue(true)
 			jest.spyOn(checkReservation, "verifyAvailability").mockReturnValue(Promise.resolve(false))
 

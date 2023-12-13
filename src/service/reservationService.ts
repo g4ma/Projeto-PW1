@@ -1,7 +1,7 @@
-import { prisma } from '../database/prisma';
-import { ReservationPaymentStatus } from '../model/reservationPaymentStatus';
-import { CheckReservationAvailability } from '../utils/checkReservationAvailability';
-import { reservationCreateValidateZod, reservationUpdateDateValidateZod, reservationUpdateStatusValidateZod } from '../utils/reservationValidateZod';
+import { prisma } from "../database/prisma"
+import { ReservationPaymentStatus } from "../model/reservationPaymentStatus"
+import { CheckReservationAvailability } from "../utils/checkReservationAvailability"
+import { reservationCreateValidateZod, reservationUpdateDateValidateZod, reservationUpdateStatusValidateZod } from "../utils/reservationValidateZod"
 
 type ParamsCreate = {
     userId: string;
@@ -30,212 +30,212 @@ type ParamsUpdateDate = {
     endTime?: string;
 }
 export class ReservationService {
-    async create({ userId, parkingSpaceId, startDate, endDate, startTime, endTime }: ParamsCreate) {
+	async create({ userId, parkingSpaceId, startDate, endDate, startTime, endTime }: ParamsCreate) {
 
-        const checkReservationAvailability = new CheckReservationAvailability();
+		const checkReservationAvailability = new CheckReservationAvailability()
 
-        const isDateValid = checkReservationAvailability.verifyDate({startDate,startTime,endDate,endTime});
+		const isDateValid = checkReservationAvailability.verifyDate({startDate,startTime,endDate,endTime})
 
-        if(!isDateValid){
-            throw new Error("dates invalid");
-        }
+		if(!isDateValid){
+			throw new Error("dates invalid")
+		}
 
-        const isAvaiable = await checkReservationAvailability.verifyAvailability({parkingSpaceId, startDate, startTime, endDate, endTime});
+		const isAvaiable = await checkReservationAvailability.verifyAvailability({parkingSpaceId, startDate, startTime, endDate, endTime})
 
-        if (!isAvaiable) {
-            throw new Error("parking space already ocupied");
-        }
+		if (!isAvaiable) {
+			throw new Error("parking space already ocupied")
+		}
 
-        const result = reservationCreateValidateZod({ userId, parkingSpaceId, startDate, endDate, startTime, endTime });
+		const result = reservationCreateValidateZod({ userId, parkingSpaceId, startDate, endDate, startTime, endTime })
 
-        if (!result.success) {
-            const formattedError = result.error.format();
-            console.log(formattedError);
-            throw new Error(...formattedError._errors);
-        }
+		if (!result.success) {
+			const formattedError = result.error.format()
+			console.log(formattedError)
+			throw new Error(...formattedError._errors)
+		}
 
-        const newReservation = await prisma.reservation.create({
-            data: {
-                userId,
-                parkingSpaceId,
-                startTime,
-                endTime,
-                startDate,
-                endDate
-            }
-        });
+		const newReservation = await prisma.reservation.create({
+			data: {
+				userId,
+				parkingSpaceId,
+				startTime,
+				endTime,
+				startDate,
+				endDate
+			}
+		})
 
-        return newReservation;
+		return newReservation
 
-    }
-    async listOwner({ userId }: ParamsUser) {
-        const owner = await prisma.owner.findUnique({
-            where: {
-                userId
-            }
-        });
+	}
+	async listOwner({ userId }: ParamsUser) {
+		const owner = await prisma.owner.findUnique({
+			where: {
+				userId
+			}
+		})
 
-        if (!owner) {
-            throw new Error("user not owner");
-        }
+		if (!owner) {
+			throw new Error("user not owner")
+		}
 
-        const reservations = await prisma.reservation.findMany({
-            where: {
-                parkingSpace: {
-                    ownerId: userId
-                }
-            }
-        });
+		const reservations = await prisma.reservation.findMany({
+			where: {
+				parkingSpace: {
+					ownerId: userId
+				}
+			}
+		})
         
 
-        if(reservations.length === 0) {
-            return { message: "does not have any reservations"};
-        }
+		if(reservations.length === 0) {
+			return { message: "does not have any reservations"}
+		}
 
-        return reservations;
+		return reservations
 
-    }
-    async listAll({ userId }: ParamsUser) {
-        const user = await prisma.user.findUnique({
-            where:{
-                id: userId
-            }
-        });
+	}
+	async listAll({ userId }: ParamsUser) {
+		const user = await prisma.user.findUnique({
+			where:{
+				id: userId
+			}
+		})
 
-        if(!user) {
-            throw new Error("user does not exists");
-        }
+		if(!user) {
+			throw new Error("user does not exists")
+		}
         
-        const reservations = await prisma.reservation.findMany({
-            where: {
-                userId
-            }
-        });
+		const reservations = await prisma.reservation.findMany({
+			where: {
+				userId
+			}
+		})
 
-        if(reservations.length === 0) {
-            return {message: "user does not have any reservations"}
-        }
+		if(reservations.length === 0) {
+			return {message: "user does not have any reservations"}
+		}
 
-        return reservations;
-    }
-    async delete({ userId, reservationId }: ParamsDelete) {
-        const reservation = await prisma.reservation.findUnique({
-            where: {
-                id: reservationId
-            }
-        });
+		return reservations
+	}
+	async delete({ userId, reservationId }: ParamsDelete) {
+		const reservation = await prisma.reservation.findUnique({
+			where: {
+				id: reservationId
+			}
+		})
 
-        if (!reservation) {
-            throw new Error("reservation does not exist");
-        }
+		if (!reservation) {
+			throw new Error("reservation does not exist")
+		}
 
-        if (reservation.userId != userId) {
-            throw new Error("user can not delete this reservation");
-        }
+		if (reservation.userId != userId) {
+			throw new Error("user can not delete this reservation")
+		}
 
-        const deletedReservation = await prisma.reservation.delete({
-            where: {
-                id: reservationId
-            }
-        })
+		const deletedReservation = await prisma.reservation.delete({
+			where: {
+				id: reservationId
+			}
+		})
 
-        return deletedReservation;
-    }
-    async updateStatusPayment({ userId, reservationId, newStatus }: ParamsUpdateStatus) {
+		return deletedReservation
+	}
+	async updateStatusPayment({ userId, reservationId, newStatus }: ParamsUpdateStatus) {
 
-        const reservation = await prisma.reservation.findUnique({
-            where: {
-                id: reservationId
-            }
-        })
-        if (!reservation) {
-            throw new Error("reservation does not exist");
-        }
+		const reservation = await prisma.reservation.findUnique({
+			where: {
+				id: reservationId
+			}
+		})
+		if (!reservation) {
+			throw new Error("reservation does not exist")
+		}
 
-        const parkingSpace = await prisma.parkingSpace.findUnique({
-            where:{
-                id: reservation.parkingSpaceId
-            }
-        })
-        if (parkingSpace?.ownerId != userId) {
-            throw new Error("user can not update this reservation");
-        }
-
-
-        const result = reservationUpdateStatusValidateZod({ newStatus });
-        if (!result.success) {
-            const formattedError = result.error.format();
-            console.log(formattedError);
-            throw new Error(...formattedError._errors);
-        }
+		const parkingSpace = await prisma.parkingSpace.findUnique({
+			where:{
+				id: reservation.parkingSpaceId
+			}
+		})
+		if (parkingSpace?.ownerId != userId) {
+			throw new Error("user can not update this reservation")
+		}
 
 
-        const updatedStatusPayment = await prisma.reservation.update({
-            where: {
-                id: reservationId
-            },
-            data: {
-                paymentStatus: newStatus as ReservationPaymentStatus
-            }
-        });
+		const result = reservationUpdateStatusValidateZod({ newStatus })
+		if (!result.success) {
+			const formattedError = result.error.format()
+			console.log(formattedError)
+			throw new Error(...formattedError._errors)
+		}
 
-        return updatedStatusPayment;
 
-    }
-    async updateReservationDate({ userId, reservationId, endDate, endTime }: ParamsUpdateDate) {
+		const updatedStatusPayment = await prisma.reservation.update({
+			where: {
+				id: reservationId
+			},
+			data: {
+				paymentStatus: newStatus as ReservationPaymentStatus
+			}
+		})
 
-        const reservation = await prisma.reservation.findUnique({
-            where: {
-                id: reservationId
-            }
-        });
-        if (!reservation) {
-            throw new Error("reservation does not exist");
-        }
-        if (reservation.userId != userId) {
-            throw new Error("user can not update this reservation");
-        }
+		return updatedStatusPayment
 
-        const result = reservationUpdateDateValidateZod({ endDate, endTime });
-        if (!result.success) {
-            const formattedError = result.error.format();
-            console.log(formattedError);
-            throw new Error(...formattedError._errors);
-        }
+	}
+	async updateReservationDate({ userId, reservationId, endDate, endTime }: ParamsUpdateDate) {
 
-        const checkReservationAvailability = new CheckReservationAvailability();
+		const reservation = await prisma.reservation.findUnique({
+			where: {
+				id: reservationId
+			}
+		})
+		if (!reservation) {
+			throw new Error("reservation does not exist")
+		}
+		if (reservation.userId != userId) {
+			throw new Error("user can not update this reservation")
+		}
 
-        const isUpdateValid = await checkReservationAvailability.checkUpdateAvailability({reservationId,endDate,endTime});
+		const result = reservationUpdateDateValidateZod({ endDate, endTime })
+		if (!result.success) {
+			const formattedError = result.error.format()
+			console.log(formattedError)
+			throw new Error(...formattedError._errors)
+		}
 
-        if(!isUpdateValid){
-            throw new Error("new end date has conflict with other reservation")
-        }
+		const checkReservationAvailability = new CheckReservationAvailability()
 
-        const isUpdateDateValid = await checkReservationAvailability.checkUpdateDateStatus({reservationId,endDate,endTime});
+		const isUpdateValid = await checkReservationAvailability.checkUpdateAvailability({reservationId,endDate,endTime})
 
-        if(!isUpdateDateValid) {
-            throw new Error("invalid end time");
-        }
+		if(!isUpdateValid){
+			throw new Error("new end date has conflict with other reservation")
+		}
 
-        const newEndDate = new Date(`${endDate}T${endTime}`);
-        const oldEndDate = new Date(`${reservation.endDate}T${reservation.endTime}`);
+		const isUpdateDateValid = await checkReservationAvailability.checkUpdateDateStatus({reservationId,endDate,endTime})
 
-        if (newEndDate.getTime() === oldEndDate.getTime()) {
-            throw new Error("new end date is the same");
-        }
+		if(!isUpdateDateValid) {
+			throw new Error("invalid end time")
+		}
 
-        const updatedReservation = prisma.reservation.update({
-            where: {
-                id: reservationId
-            },
-            data: {
-                endTime,
-                endDate,
-                paymentStatus: ReservationPaymentStatus.Pendente
-            }
-        });
+		const newEndDate = new Date(`${endDate}T${endTime}`)
+		const oldEndDate = new Date(`${reservation.endDate}T${reservation.endTime}`)
 
-        return updatedReservation;
+		if (newEndDate.getTime() === oldEndDate.getTime()) {
+			throw new Error("new end date is the same")
+		}
 
-    }
+		const updatedReservation = prisma.reservation.update({
+			where: {
+				id: reservationId
+			},
+			data: {
+				endTime,
+				endDate,
+				paymentStatus: ReservationPaymentStatus.Pendente
+			}
+		})
+
+		return updatedReservation
+
+	}
 }
