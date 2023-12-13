@@ -159,12 +159,11 @@ describe("Gerenciador de vagas de estacionamento", () => {
 					endTime
 				},
 			})
-
-			const checkReservationAvailability = new validateReservation.CheckReservationAvailability()
-			jest.spyOn(checkReservationAvailability, "checkUpdateAvailability").mockReturnValue(Promise.resolve(false))
+			const checkUpdateAvailabilityMock = jest.spyOn(CheckReservationAvailability.prototype, "checkUpdateAvailability").mockResolvedValue(false)
 
 			await expect(gerenciador.updateReservationDate({userId, reservationId, endDate, endTime})).rejects.toEqual(new Error("new end date has conflict with other reservation"))
 			expect(reservationUpdateDateValidateZod).toHaveBeenCalledTimes(1)
+			expect(checkUpdateAvailabilityMock).toHaveBeenCalledTimes(1)
 		})
 
 		test("Realizar registro de reserva de vaga de estacionamento que está ocupada", async () => {
@@ -180,6 +179,41 @@ describe("Gerenciador de vagas de estacionamento", () => {
 			jest.spyOn(checkReservation, "verifyAvailability").mockReturnValue(Promise.resolve(false))
 
 			await expect(gerenciador.create({userId, parkingSpaceId, endDate, endTime, startDate, startTime})).rejects.toEqual(new Error("parking space already ocupied"))
+		})
+
+		test("Registrar reserva de vaga de estacionamento com horário em uma data não disponível", async () =>{
+			const reservationMock = {
+				id: "05c57c12-9b2b-47a3-a2dd-b42c031c5028",
+				userId: "b3e29220-e5e0-4339-b612-0b85e3ef4ceb",
+				parkingSpaceId: "d3d650f9-898f-4331-917a-c06ead6a9024",
+				startTime: "10:20",
+				endTime: "11:40",
+				startDate: "19/11/2023",   
+				endDate: "19/11/2023",  
+				paymentStatus: ReservationPaymentStatus.Aprovado
+			}
+
+			const verifyDate = jest.spyOn(CheckReservationAvailability.prototype, "verifyDate").mockReturnValue(true)
+			const verifyAvailability = jest.spyOn(CheckReservationAvailability.prototype, "verifyAvailability").mockResolvedValue(false)
+
+			const reservationValidateZod = jest.spyOn(validate, "reservationCreateValidateZod")
+
+			prismaMock.reservation.create.mockResolvedValue(reservationMock)
+      
+			await expect(gerenciador.create({
+				userId: "b3e29220-e5e0-4339-b612-0b85e3ef4ceb",
+				parkingSpaceId: "d3d650f9-898f-4331-917a-c06ead6a9024",
+				startTime: "10:20",
+				endTime: "11:40",
+				startDate: "19/11/2023",   
+				endDate: "19/11/2023"
+			})).rejects.toBeInstanceOf(Error)
+
+			expect(verifyDate).toHaveBeenCalledTimes(1)
+			expect(verifyAvailability).toHaveBeenCalledTimes(1)
+			expect(reservationValidateZod).toHaveBeenCalledTimes(0)
+			expect(prismaMock.reservation.create).toHaveBeenCalledTimes(0)
+		
 		})
 
 	})
