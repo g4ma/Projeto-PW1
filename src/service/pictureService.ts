@@ -5,6 +5,10 @@ type PictureServiceParamsCreate = {
     parkingSpaceId: string
 }
 
+type PictureServiceParamsDelete = {
+	id: string
+}
+
 export default class PictureService{
 	async create({pictures, parkingSpaceId}: PictureServiceParamsCreate) {
 		try{
@@ -48,4 +52,34 @@ export default class PictureService{
 			throw error
 		}
 	}
+	async delete({id}: PictureServiceParamsDelete){
+		try {
+			const picture = await prisma.picture.findUnique({
+				where: {
+					id
+				}
+			})
+
+
+			if(!picture){
+				throw new Error("picture doens't exists")
+			}
+
+
+			const deletedPicture = await prisma.picture.findUnique({
+				where: {
+					id
+				}
+			})
+
+
+			return deletedPicture
+		} catch(error){
+			console.log(error)
+			throw error
+		}
+	}
+
+
+
 }
