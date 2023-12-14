@@ -8,13 +8,13 @@ export class ParkingSpaceController{
 		const ownerId = req.params.userId
 		const pictures = req.files as Express.Multer.File[]
 
-		const { latitude, longitude, description, pricePerHour, disponibility, type } = req.body
+		const { latitude, longitude, description, pricePerHour, type } = req.body
 		try{
-			const parkingSpace = await parkingSpaceService.create({pictures, latitude, longitude, pricePerHour, disponibility, description, type, ownerId })
+			const parkingSpace = await parkingSpaceService.create({pictures, latitude, longitude, pricePerHour, description, type, ownerId })
 			return res.status(201).json(parkingSpace)
 		} catch(error){
 			console.log(error)
-			return res.status(400).json({ error: "something went wrong"})
+			return res.status(400).json(error.issues ?? { error: error.message})
 		}
 	}
 
@@ -24,7 +24,7 @@ export class ParkingSpaceController{
 			const parkingSpace = await parkingSpaceService.detail(id)
 			return res.status(200).json(parkingSpace)
 		} catch(error){
-			return res.status(404).json({ error: "something went wrong" })
+			return res.status(404).json({ error: error.message })
 		}
 	}
 
@@ -33,7 +33,7 @@ export class ParkingSpaceController{
 			const parkingSpaces = await parkingSpaceService.listAll()
 			return res.status(200).json(parkingSpaces)
 		} catch(error){
-			return res.status(400).json({ error: "something went wrong" })
+			return res.status(400).json({ error: error.message })
 		}
 	}
 
@@ -46,7 +46,7 @@ export class ParkingSpaceController{
 			const parkingSpace = await parkingSpaceService.update({id, userId, disponibility, description, pricePerHour})
 			return res.status(200).json(parkingSpace)
 		} catch(error){
-			return res.status(400).json({ error: "something went wrong" })
+			return res.status(400).json(error.issues ?? { error: error.message })
 		}
 	}
 
@@ -57,7 +57,7 @@ export class ParkingSpaceController{
 			const parkingSpace = await parkingSpaceService.delete(id, userId)
 			return res.status(200).json(parkingSpace)
 		} catch(error){
-			return res.status(400).json({ error: "something went wrong" })
+			return res.status(400).json({ error: error.message })
 		}
 	}
 
