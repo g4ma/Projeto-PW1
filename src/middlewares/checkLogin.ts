@@ -1,11 +1,15 @@
 import {Request,Response,NextFunction } from "express"
-import jwt, { JwtPayload } from "jsonwebtoken"
+import jwt, { Secret } from "jsonwebtoken"
 import DotEnv from "dotenv"
 import { isBan } from "../utils/cache"
 
 DotEnv.config()
 
-const { SECRET } = process.env 
+const SECRET = process.env.SECRET as Secret 
+
+type Payload = {
+	id: string
+}
 
 export async function checkLogin(
 	req: Request, 
@@ -21,7 +25,7 @@ export async function checkLogin(
 		if(isBanned){
 			throw new Error()
 		}
-		const result = jwt.verify(token.toString(), SECRET as string) as JwtPayload
+		const result = jwt.verify(token.toString(), SECRET) as Payload
 		req.params.userId = result.id
 	}catch(error: unknown){
 		return res.status(401).json({message: "Token expired or invalid"})

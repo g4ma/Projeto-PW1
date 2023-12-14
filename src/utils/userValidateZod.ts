@@ -43,8 +43,8 @@ export function userCreateValidateZod(user: UserParamsValidate){
 
 export function userUpdateValidateZod(user: UserParamsUpdate){
 	const schemaZod = z.object({
-		email: z.string({required_error: "email is required"}).email().max(256),
-		phoneNumber: z.string({required_error: "phone number is required"}).max(16),
+		email: z.string().email().max(256).optional(),
+		phoneNumber: z.string().max(16).refine((value)=> validatePhoneNumber(value),{message:"number format must be (99)99999-9999"}).optional()
 	})
 	const result = schemaZod.safeParse(user)
 	return result
