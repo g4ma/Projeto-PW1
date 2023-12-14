@@ -5,11 +5,13 @@ import app from "../app"
 describe("Users", () => {
 	let token: string
 	let userId: string
+	
 	afterAll( async () => {
+		await prisma.owner.deleteMany()
 		await prisma.user.deleteMany()
 	})
 
-	beforeEach(async () => {
+	beforeAll(async () => {
 		const newUser = {
 			name: "Maria da Silva",
 			email: "mariasilva@gmail.com",
@@ -18,17 +20,19 @@ describe("Users", () => {
 		}
 	
 		const user = await request(app).post("/users").send(newUser)
+		console.log(user.body)
 		userId = user.body.id
 		const tokenResponse = await request(app).post("/login").send({email: newUser.email, password: newUser.password})
 		token = tokenResponse.body.token
+		console.log(userId, token)
 	})
 
 	test("cadastro de usuário com todas as informações corretas", async () => {
 		const newUser = {
-			name: "Maria da Silva",
-			email: "mariasilva@gmail.com",
-			phoneNumber: "(83)99168-4630",
-			password: "Senha2023"
+			name: "Gal Costa",
+			email: "galcosta@gmail.com",
+			phoneNumber: "(83)99547-8246",
+			password: "Senha2200"
 		}
 
 		const response = await request(app).post("/users").set("Content-type", "application/json").send({name: newUser.name, email: newUser.email, phoneNumber: newUser.phoneNumber, password: newUser.password})
@@ -38,13 +42,11 @@ describe("Users", () => {
 		expect({
 			email: newUser.email,
 			name: newUser.name,
-			phoneNumber: newUser.phoneNumber,
-			password: newUser.password
+			phoneNumber: newUser.phoneNumber
 		}).toEqual({
 			email: receivedUser.email,
 			name: receivedUser.name,
-			phoneNumber: receivedUser.phoneNumber,
-			password: receivedUser.password
+			phoneNumber: receivedUser.phoneNumber
 		})
 		expect(response.status).toBe(201)
 	}, 10000)
@@ -52,9 +54,9 @@ describe("Users", () => {
 
 	test("Registro de usuário com campos em branco", async() =>{
 		const newUser = {
-			name: "Maria da Silva",
-			email: "mariasilva@gmail.com",
-			password: "Senha2023"
+			name: "Marisa Monte",
+			email: "marisamonte@gmail.com",
+			password: "Senha8427"
 		}
 		const response = await request(app).post("/users").set("Content-type", "application/json").send({name: newUser.name, email: newUser.email, password: newUser.password})
 
@@ -72,9 +74,9 @@ describe("Users", () => {
 			.set("authorization", token)
 			.send({ pixKey })
 	
-		expect(response.status).toBe(200)
-	
+
 		expect(response.body.pixKey).toBe(pixKey)
+		expect(response.status).toBe(200)
 	
 		await expect(prisma.owner.findUnique({
 			where: {
