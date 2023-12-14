@@ -1,10 +1,8 @@
 import request from "supertest"
 import * as fs from "fs"
 
-import parkingSpaceRoutes from "../routes/parkingSpaceRoutes"
-import routesUser from "../routes/userRoutes"
-import authRoutes from "../routes/authRoutes"
 import { prisma } from "../database/prisma"
+import app from "../app"
 
 describe("Vagas de estacionamento", () => {
 	let token: string
@@ -18,12 +16,12 @@ describe("Vagas de estacionamento", () => {
 		const newUser = {
 			name: "Maria da Silva",
 			email: "mariasilva@gmail.com",
-			phoneNumber: "(83)991684630",
+			phoneNumber: "(83)99168-4630",
 			password: "Senha2023"
 		}
 
-		await request(routesUser).post("/users").send(newUser)
-		const tokenResponse = await request(authRoutes).post("/login").send({name: newUser.name, password: newUser.password})
+		await request(app).post("/users").send(newUser)
+		const tokenResponse = await request(app).post("/login").send({name: newUser.name, password: newUser.password})
 		token = tokenResponse.body.token
 	})
 
@@ -43,7 +41,7 @@ describe("Vagas de estacionamento", () => {
 
 		formData.append("pictures", fileBlob)
 
-		const response = await request(parkingSpaceRoutes).post("/parkingSpaces").send(formData).set("authorization", `${token}`).set("Content-Type", "multipart/form-data")
+		const response = await request(app).post("/parkingSpaces").send(formData).set("authorization", `${token}`).set("Content-Type", "multipart/form-data")
 
 		const receivedParkingSpace = response.body 
 
