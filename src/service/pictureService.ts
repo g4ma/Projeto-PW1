@@ -1,17 +1,22 @@
 import { prisma } from "../database/prisma"
 
 type PictureServiceParamsCreate = {
-    pictures: Express.Multer.File[]
-    parkingSpaceId: string
+	pictures: Express.Multer.File[]
+	parkingSpaceId: string
 }
 
 type PictureServiceParamsDelete = {
 	id: string
 }
 
-export default class PictureService{
-	async create({pictures, parkingSpaceId}: PictureServiceParamsCreate) {
-		try{
+type PictureServiceParamsGet = {
+	parkingSpaceId: string
+}
+
+
+export default class PictureService {
+	async create({ pictures, parkingSpaceId }: PictureServiceParamsCreate) {
+		try {
 			const parkingSpace = await prisma.parkingSpace.findUnique({
 				where: {
 					id: parkingSpaceId
@@ -19,8 +24,8 @@ export default class PictureService{
 			})
 
 
-			if(!parkingSpace){
-				throw new Error("parking space doens't exists")
+			if (!parkingSpace) {
+				throw new Error("parking space doesn't exists")
 			}
 
 			pictures.forEach(async (pic) => {
@@ -47,24 +52,22 @@ export default class PictureService{
 			})
 
 			return parkingSpaceWithPics
-		} catch(error){
+		} catch (error) {
 			console.log(error)
 			throw error
 		}
 	}
-	async delete({id}: PictureServiceParamsDelete){
+	async delete({ id }: PictureServiceParamsDelete) {
 		try {
 			const picture = await prisma.picture.findUnique({
 				where: {
 					id
 				}
-			})
+			});
 
-
-			if(!picture){
-				throw new Error("picture doens't exists")
+			if (!picture) {
+				throw new Error("picture doesn't exists")
 			}
-
 
 			const deletedPicture = await prisma.picture.findUnique({
 				where: {
@@ -72,14 +75,37 @@ export default class PictureService{
 				}
 			})
 
-
 			return deletedPicture
-		} catch(error){
+		} catch (error) {
 			console.log(error)
 			throw error
 		}
 	}
 
+	async listAllByParkingSpace({ parkingSpaceId }: PictureServiceParamsGet) {
+		try {
+			const parkingSpace = await prisma.parkingSpace.findUnique({
+				where: {
+					id: parkingSpaceId
+				}
+			})
 
+			if (!parkingSpace) {
+				throw new Error("picture doesn't exists")
+			}
+
+			const pictures = await prisma.picture.findMany({
+				where: {
+					parkingSpaceId
+				}
+			})
+
+
+			return pictures
+		} catch (error) {
+			console.log(error)
+			throw error
+		}
+	}
 
 }
