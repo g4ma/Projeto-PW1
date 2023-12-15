@@ -12,5 +12,5 @@ const pictureController = new PictureController()
 
 pictureRoutes.post("/pictures/parkingSpace", checkLogin, isOwner,  upload.array("pictures"), pictureController.create)
 pictureRoutes.delete("/pictures/:id", checkLogin, isOwner,  pictureController.delete)
-pictureRoutes.get("/pictures/:id", checkLogin,  pictureController.listAllByParkingSpace)
+pictureRoutes.get("/pictures/:parkingSpaceId", checkLogin,  pictureController.listAllByParkingSpace)
 export default pictureRoutes

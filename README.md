@@ -86,5 +86,5 @@ Imagens
 URL	| Método | Descrição
 ------|------------|-----
 /pictures/parkingSpace |	POST |	Recurso de criação de imagens de uma vaga de estacionamento, espera um json no corpo da requisição
-/pictures/:id	| GET |	Recurso de exibir todas as imagens de uma vagas de estacionamento
+/pictures/:parkingSpaceId	| GET |	Recurso de exibir todas as imagens de uma vagas de estacionamento
 /pictures/:id	| DELETE |	Recurso de exclusão de imagens de uma vaga de estacionamento que recebe um id como parâmetro

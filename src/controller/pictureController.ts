@@ -34,7 +34,7 @@ export class PictureController {
 	}
 
 	async listAllByParkingSpace(req: Request, res: Response) {
-		const { parkingSpaceId } = req.body
+		const { parkingSpaceId } = req.params
 
 
 		try {
