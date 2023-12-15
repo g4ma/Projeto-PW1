@@ -64,13 +64,13 @@ export default class PictureService {
 				where: {
 					id
 				}
-			});
+			})
 
 			if (!picture) {
 				throw new PictureError("picture doesn't exists")
 			}
 
-			const deletedPicture = await prisma.picture.findUnique({
+			const deletedPicture = await prisma.picture.delete({
 				where: {
 					id
 				}
