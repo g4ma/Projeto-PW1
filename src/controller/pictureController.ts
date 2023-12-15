@@ -16,7 +16,7 @@ export class PictureController {
 			return res.status(201).json(parkingSpace)
 		} catch (error) {
 			console.log(error)
-			return res.status(400).json({ error: "something went wrong" })
+			return res.status(400).json({ error: error.message })
 		}
 	}
 	async delete(req: Request, res: Response) {
@@ -29,7 +29,7 @@ export class PictureController {
 			return res.status(200).json(picture)
 		} catch (error) {
 			console.log(error)
-			return res.status(400).json({ error: "something went wrong" })
+			return res.status(400).json({ error: error.message })
 		}
 	}
 
@@ -42,7 +42,7 @@ export class PictureController {
 			return res.status(200).json(picture)
 		} catch (error) {
 			console.log(error)
-			return res.status(400).json({ error: "something went wrong" })
+			return res.status(400).json({ error: error.message })
 		}
 	}
 
