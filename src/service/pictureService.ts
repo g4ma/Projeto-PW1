@@ -1,4 +1,5 @@
 import { prisma } from "../database/prisma"
+import { PictureError } from "../utils/pictureError"
 
 type PictureServiceParamsCreate = {
 	pictures: Express.Multer.File[]
@@ -25,7 +26,7 @@ export default class PictureService {
 
 
 			if (!parkingSpace) {
-				throw new Error("parking space doesn't exists")
+				throw new PictureError("parking space doesn't exists")
 			}
 
 			pictures.forEach(async (pic) => {
@@ -66,7 +67,7 @@ export default class PictureService {
 			});
 
 			if (!picture) {
-				throw new Error("picture doesn't exists")
+				throw new PictureError("picture doesn't exists")
 			}
 
 			const deletedPicture = await prisma.picture.findUnique({
@@ -91,7 +92,7 @@ export default class PictureService {
 			})
 
 			if (!parkingSpace) {
-				throw new Error("picture doesn't exists")
+				throw new PictureError("picture doesn't exists")
 			}
 
 			const pictures = await prisma.picture.findMany({
