@@ -20,9 +20,9 @@ export class ReservationController {
                 endTime
             });
             res.status(201).json(result);
-        } catch (error: unknown) {
+        } catch (error) {
             console.log(error);
-            res.status(400).json({ error: "something went wrong" });
+            res.status(400).json(error.issues ?? { error: error.message});
         }
 
     }
@@ -35,7 +35,7 @@ export class ReservationController {
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
-            res.status(400).json({ error: "something went wrong" });
+            res.status(400).json({ error: error.message });
         }
     }
 
@@ -47,7 +47,7 @@ export class ReservationController {
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
-            res.status(400).json({ error: "something went wrong" });
+            res.status(400).json({ error: error.message });
         }
     }
 
@@ -63,7 +63,7 @@ export class ReservationController {
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
-            res.status(400).json({ error: "something went wrong" });
+            res.status(400).json({ error: error.message });
         }
     }
 
@@ -81,7 +81,7 @@ export class ReservationController {
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
-            res.status(400).json({ error: "something went wrong" });
+            res.status(400).json(error.issues ?? { error: error.message});
         }
     }
 
@@ -100,7 +100,7 @@ export class ReservationController {
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
-            res.status(400).json({ error: "something went wrong" });
+            res.status(400).json(error.issues ?? { error: error.message});
         }
     }
 
