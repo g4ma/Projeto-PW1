@@ -19,5 +19,19 @@ export class PictureController {
 			return res.status(400).json({ error: "something went wrong"})
 		}
 	}
+	async delete(req: Request, res: Response){
+       
+		const { id } = req.params
+
+
+		try{
+			const picture = await pictureService.delete({id})
+			return res.status(200).json(picture)
+		} catch(error){
+			console.log(error)
+			return res.status(400).json({ error: "something went wrong"})
+		}
+	}
+
 }
 
