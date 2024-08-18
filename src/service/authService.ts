@@ -24,7 +24,7 @@ class AuthService{
 			const token = jwt.sign({id: user.id}, SECRET, {
 				expiresIn: "1h"
 			})
-			return {token: token}
+			return {token: token, id:user.id}
 		}
 		throw new Error("User with email and password provided does not exist")
 	}
