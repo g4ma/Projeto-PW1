@@ -36,7 +36,7 @@ export class ParkingSpaceController {
 		}
 	}
 
-	async listAll(req: Request, res: Response) {
+	async listByOwner(req: Request, res: Response) {
 		const userId = req.params.userId
 		try {
 			const parkingSpaces = await parkingSpaceService.listByOwner(userId)
@@ -46,7 +46,7 @@ export class ParkingSpaceController {
 		}
 	}
 
-	async listByOwner(req: Request, res: Response) {
+	async listAll(req: Request, res: Response) {
 		try {
 			const parkingSpaces = await parkingSpaceService.listAll()
 			return res.status(200).json(parkingSpaces)

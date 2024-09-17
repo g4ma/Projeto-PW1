@@ -25,7 +25,9 @@ parkingSpaceRoutes.get(
 )
 parkingSpaceRoutes.get("/parkingSpaces", parkingSpaceController.listAll)
 parkingSpaceRoutes.get(
-	"/parkingSpaces/owner",
+	"/owner/parkingSpaces",
+	checkLogin,
+	isOwner,
 	parkingSpaceController.listByOwner
 )
 parkingSpaceRoutes.patch(
