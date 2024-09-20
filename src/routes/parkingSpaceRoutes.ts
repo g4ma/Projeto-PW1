@@ -18,6 +18,13 @@ parkingSpaceRoutes.post(
 	upload.array("pictures"),
 	parkingSpaceController.create
 )
+parkingSpaceRoutes.post(
+	"/isFromOwner/parkingSpace/:id",
+	checkLogin,
+	isOwner,
+	verifyUserOnParkingSpace,
+	parkingSpaceController.isFromOwner
+)
 parkingSpaceRoutes.get(
 	"/parkingSpaces/:id",
 	checkLogin,
