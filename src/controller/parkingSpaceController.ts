@@ -3,62 +3,89 @@ import { Request, Response } from "express"
 
 const parkingSpaceService = new ParkingSpaceService()
 
-export class ParkingSpaceController{
-	async create(req: Request, res: Response){
+export class ParkingSpaceController {
+	async create(req: Request, res: Response) {
 		const ownerId = req.params.userId
 		const pictures = req.files as Express.Multer.File[]
 
 		const { latitude, longitude, description, pricePerHour, type } = req.body
-		try{
-			const parkingSpace = await parkingSpaceService.create({pictures, latitude, longitude, pricePerHour, description, type, ownerId })
+		try {
+			const parkingSpace = await parkingSpaceService.create({
+				pictures,
+				latitude,
+				longitude,
+				pricePerHour,
+				description,
+				type,
+				ownerId,
+			})
 			return res.status(201).json(parkingSpace)
-		} catch(error){
+		} catch (error) {
 			console.log(error)
-			return res.status(400).json(error.issues ?? { error: error.message})
-		}
-	}
-
-	async detail(req: Request, res: Response){
-		const { id } = req.params
-		try{
-			const parkingSpace = await parkingSpaceService.detail(id)
-			return res.status(200).json(parkingSpace)
-		} catch(error){
-			return res.status(404).json({ error: error.message })
-		}
-	}
-
-	async listAll(req: Request, res: Response){
-		try{
-			const parkingSpaces = await parkingSpaceService.listAll()
-			return res.status(200).json(parkingSpaces)
-		} catch(error){
-			return res.status(400).json({ error: error.message })
-		}
-	}
-
-	async update(req: Request, res: Response){
-		const { id } = req.params
-		const userId = req.params.userId
-
-		const { description, pricePerHour, disponibility } = req.body
-		try{
-			const parkingSpace = await parkingSpaceService.update({id, userId, disponibility, description, pricePerHour})
-			return res.status(200).json(parkingSpace)
-		} catch(error){
 			return res.status(400).json(error.issues ?? { error: error.message })
 		}
 	}
 
-	async delete(req: Request, res: Response){
+	async detail(req: Request, res: Response) {
 		const { id } = req.params
-		const userId = req.params.userId
-		try{
-			const parkingSpace = await parkingSpaceService.delete(id, userId)
+		try {
+			const parkingSpace = await parkingSpaceService.detail(id)
 			return res.status(200).json(parkingSpace)
-		} catch(error){
+		} catch (error) {
+			return res.status(404).json({ error: error.message })
+		}
+	}
+
+	async listByOwner(req: Request, res: Response) {
+		const userId = req.params.userId
+		try {
+			const parkingSpaces = await parkingSpaceService.listByOwner(userId)
+			return res.status(200).json(parkingSpaces)
+		} catch (error) {
 			return res.status(400).json({ error: error.message })
 		}
 	}
 
+	async listAll(req: Request, res: Response) {
+		try {
+			const parkingSpaces = await parkingSpaceService.listAll()
+			return res.status(200).json(parkingSpaces)
+		} catch (error) {
+			return res.status(400).json({ error: error.message })
+		}
+	}
+
+	async isFromOwner(req: Request, res: Response){
+		return res.status(200).json(true)
+	}
+
+	async update(req: Request, res: Response) {
+		const { id } = req.params
+		const userId = req.params.userId
+
+		const { description, pricePerHour, disponibility } = req.body
+		try {
+			const parkingSpace = await parkingSpaceService.update({
+				id,
+				userId,
+				disponibility,
+				description,
+				pricePerHour,
+			})
+			return res.status(200).json(parkingSpace)
+		} catch (error) {
+			return res.status(400).json(error.issues ?? { error: error.message })
+		}
+	}
+
+	async delete(req: Request, res: Response) {
+		const { id } = req.params
+		const userId = req.params.userId
+		try {
+			const parkingSpace = await parkingSpaceService.delete(id, userId)
+			return res.status(200).json(parkingSpace)
+		} catch (error) {
+			return res.status(400).json({ error: error.message })
+		}
+	}
 }
