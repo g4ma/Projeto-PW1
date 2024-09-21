@@ -55,6 +55,7 @@ model Reservation {
   endTime        String
   startDate      String
   endDate        String
+  price          Float
   paymentStatus  ReservationPaymentStatus @default(Pendente)
 
   parkingSpace ParkingSpace @relation(fields: [parkingSpaceId], references: [id])
