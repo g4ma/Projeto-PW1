@@ -22,7 +22,7 @@ export class ReservationController {
             res.status(201).json(result);
         } catch (error) {
             console.log(error);
-            res.status(400).json(error.issues ?? { error: error.message});
+            res.status(400).json(error.issues ?? { error: error.message });
         }
 
     }
@@ -51,6 +51,18 @@ export class ReservationController {
         }
     }
 
+    async listParkingReservation(req: Request, res: Response) {
+        const { parkingSpaceId } = req.params;
+
+        try {
+            const result = await reservationService.listParkingReservation(parkingSpaceId);
+            res.status(200).json(result);
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ error: error.message });
+        }
+    }
+
     async delete(req: Request, res: Response) {
         const { reservationId } = req.params;
         const userId = req.params.userId;
@@ -71,7 +83,7 @@ export class ReservationController {
         const { newStatus } = req.body;
         const { reservationId } = req.params;
         const userId = req.params.userId;
-        
+
         try {
             const result = await reservationService.updateStatusPayment({
                 userId,
@@ -81,7 +93,7 @@ export class ReservationController {
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
-            res.status(400).json(error.issues ?? { error: error.message});
+            res.status(400).json(error.issues ?? { error: error.message });
         }
     }
 
@@ -100,7 +112,7 @@ export class ReservationController {
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
-            res.status(400).json(error.issues ?? { error: error.message});
+            res.status(400).json(error.issues ?? { error: error.message });
         }
     }
 

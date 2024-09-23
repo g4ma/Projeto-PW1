@@ -1,4 +1,5 @@
 import { prisma } from '../database/prisma';
+import { parse, isWithinInterval, isBefore, isAfter } from 'date-fns';
 import { ReservationPaymentStatus } from '../model/reservationPaymentStatus';
 
 type ParamsDate = {
@@ -28,7 +29,10 @@ export class CheckReservationAvailability {
 
         const reservations = await prisma.reservation.findMany({
             where: {
-                parkingSpaceId
+                parkingSpaceId,
+                paymentStatus: {
+                    not: ReservationPaymentStatus.Cancelado
+                }
             }
         });
 
@@ -36,30 +40,33 @@ export class CheckReservationAvailability {
             return true;
         }
 
-        const newStartDate = new Date(`${startDate}T${startTime}`);
-        const newEndDate = new Date(`${endDate}T${endTime}`);
+        const newStartDate = parse(`${startDate} ${startTime}`, 'dd/MM/yyyy HH:mm', new Date());
+        const newEndDate = parse(`${endDate} ${endTime}`, 'dd/MM/yyyy HH:mm', new Date());
 
 
         for (const reservation of reservations) {
 
-            const existentStartDate = new Date(`${reservation.startDate}T${reservation.startTime}`);
-            const existentEndDate = new Date(`${reservation.endDate}T${reservation.endTime}`);
+            const existentStartDate = parse(`${reservation.startDate} ${reservation.startTime}`, 'dd/MM/yyyy HH:mm', new Date());
+            const existentEndDate = parse(`${reservation.endDate} ${reservation.endTime}`, 'dd/MM/yyyy HH:mm', new Date());
 
-            if (
-                (newStartDate >= existentStartDate && newStartDate < existentEndDate) ||
-                (newEndDate > existentStartDate && newEndDate <= existentEndDate) ||
-                (newStartDate <= existentStartDate && newEndDate >= existentEndDate)
-            ) {
-                return false;
+            if (isWithinInterval(newStartDate, { start: existentStartDate, end: existentEndDate })) {
+                return (`Data inicial coincide com uma reserva existente (${reservation.startDate} ${reservation.startTime} - ${reservation.endDate} ${reservation.endTime}).`);
             }
+            if (isWithinInterval(newEndDate, { start: existentStartDate, end: existentEndDate })) {
+                return (`Data final coincide com uma reserva existente (${reservation.startDate} ${reservation.startTime} - ${reservation.endDate} ${reservation.endTime}).`);
+            }
+            if (isBefore(newStartDate, existentStartDate) && isAfter(newEndDate, existentEndDate)) {
+                return (`O período da nova reserva coincide completamente com a reserva existente (${reservation.startDate} ${reservation.startTime} - ${reservation.endDate} ${reservation.endTime}).`);
+            }
+
         }
         return true;
     }
 
     verifyDate({ startDate, startTime, endDate, endTime }: ParamsDate) {
 
-        const StartDate = new Date(`${startDate}T${startTime}`);
-        const EndDate = new Date(`${endDate}T${endTime}`);
+        const StartDate = parse(`${startDate} ${startTime}`, 'dd/MM/yyyy HH:mm', new Date());
+        const EndDate = parse(`${endDate} ${endTime}`, 'dd/MM/yyyy HH:mm', new Date());
 
         if (StartDate > EndDate) {
             return false;
@@ -82,16 +89,17 @@ export class CheckReservationAvailability {
             }
         });
 
-        const newEndDate = new Date(`${endDate}T${endTime}`);
+        const newEndDate = parse(`${endDate} ${endTime}`, 'dd/MM/yyyy HH:mm', new Date());
 
         for (const othersReservations of reservations) {
 
             if (othersReservations.id != reservation?.id) {
-                const existentStartDate = new Date(`${othersReservations.startDate}T${othersReservations.startTime}`);
-                const existentEndDate = new Date(`${othersReservations.endDate}T${othersReservations.endTime}`);
 
-                if ((newEndDate > existentStartDate && newEndDate <= existentEndDate)) {
-                    return false;
+                const existentStartDate = parse(`${othersReservations.startDate} ${othersReservations.startTime}`, 'dd/MM/yyyy HH:mm', new Date());
+                const existentEndDate = parse(`${othersReservations.endDate} ${othersReservations.endTime}`, 'dd/MM/yyyy HH:mm', new Date());
+
+                if (isWithinInterval(newEndDate, { start: existentStartDate, end: existentEndDate })) {
+                    return `Data final coincide com uma reserva existente (${othersReservations.startDate} ${othersReservations.startTime} - ${othersReservations.endDate} ${othersReservations.endTime}).`;
                 }
             }
         }
@@ -106,15 +114,16 @@ export class CheckReservationAvailability {
             }
         });
 
-        const newEndDate = new Date(`${endDate}T${endTime}`);
-        const oldEndDate = new Date(`${reservation?.endDate}T${reservation?.endTime}`);
+        const newEndDate = parse(`${endDate} ${endTime}`, 'dd/MM/yyyy HH:mm', new Date());
+        const oldEndDate = parse(`${reservation?.endDate} ${reservation?.endTime}`, 'dd/MM/yyyy HH:mm', new Date());
 
         if (newEndDate < oldEndDate) {
             if (reservation?.paymentStatus != ReservationPaymentStatus.Pendente)
                 return false;
         }
 
-        const oldStartDate = new Date(`${reservation?.startDate}T${reservation?.startTime}`);
+        const oldStartDate = parse(`${reservation?.startDate} ${reservation?.startTime}`, 'dd/MM/yyyy HH:mm', new Date());
+
 
         if (oldStartDate > newEndDate) {
             return false;
@@ -124,7 +133,7 @@ export class CheckReservationAvailability {
 
     }
 
-    async checkUpdateDateIsNotTheSame({reservationId, endDate, endTime}:ParamsUpdate){
+    async checkUpdateDateIsNotTheSame({ reservationId, endDate, endTime }: ParamsUpdate) {
 
         const reservation = await prisma.reservation.findUnique({
             where: {
@@ -132,8 +141,8 @@ export class CheckReservationAvailability {
             }
         });
 
-        const newEndDate = new Date(`${endDate}T${endTime}`);
-        const oldEndDate = new Date(`${reservation?.endDate}T${reservation?.endTime}`);
+        const newEndDate = parse(`${endDate} ${endTime}`, 'dd/MM/yyyy HH:mm', new Date());
+        const oldEndDate = parse(`${reservation?.endDate} ${reservation?.endTime}`, 'dd/MM/yyyy HH:mm', new Date());
 
         if (newEndDate.getTime() === oldEndDate.getTime()) {
             return false;

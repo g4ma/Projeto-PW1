@@ -1,5 +1,6 @@
 import { prisma } from '../database/prisma';
 import { ReservationPaymentStatus } from '../model/reservationPaymentStatus';
+import { calculateReservationPrice } from '../utils/calculateReservationPrice';
 import { CheckReservationAvailability } from '../utils/checkReservationAvailability';
 import { ReservationError, ReservationValuesError } from '../utils/reservationError';
 import { reservationCreateValidateZod, reservationUpdateDateValidateZod, reservationUpdateStatusValidateZod } from '../utils/reservationValidateZod';
@@ -34,6 +35,7 @@ type ParamsUpdateDate = {
 
 
 export class ReservationService {
+
     async create({ userId, parkingSpaceId, startDate, endDate, startTime, endTime }: ParamsCreate) {
 
         try {
@@ -51,9 +53,30 @@ export class ReservationService {
             }
 
             const isAvaiable = await checkReservationAvailability.verifyAvailability({ parkingSpaceId, startDate, startTime, endDate, endTime });
-            if (!isAvaiable) {
-                throw new ReservationError("parking space already ocupied");
+            if (isAvaiable != true) {
+                throw new ReservationError(isAvaiable);
             }
+
+            const parkingSpace = await prisma.parkingSpace.findUnique({
+                where: {
+                    id: parkingSpaceId
+                },
+                select: {
+                    pricePerHour: true,
+                },
+            });
+
+            if (!parkingSpace) {
+                throw new ReservationError("parking space does not exist");
+            }
+
+            const price = calculateReservationPrice({
+                startDate,
+                startTime,
+                endDate,
+                endTime,
+                parkingSpacePrice: parkingSpace.pricePerHour,
+            });
 
             const newReservation = await prisma.reservation.create({
                 data: {
@@ -62,7 +85,8 @@ export class ReservationService {
                     startTime,
                     endTime,
                     startDate,
-                    endDate
+                    endDate,
+                    price
                 }
             });
 
@@ -93,7 +117,14 @@ export class ReservationService {
                     parkingSpace: {
                         ownerId: userId
                     }
-                }
+                },
+                include: {
+                    user: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
             });
             if (reservations.length === 0) {
                 return { message: "does not have any reservations" };
@@ -131,6 +162,55 @@ export class ReservationService {
             }
 
             return reservations;
+
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+
+    }
+
+    async listParkingReservation (parkingSpaceId: string) {
+
+        try {
+
+            const parkingSpace = await prisma.parkingSpace.findUnique({
+                where: {
+                    id: parkingSpaceId
+                },
+                include: {
+                    picture: {
+                        select: {
+                            path: true,
+                        },
+                    },
+                    owner: {
+                        select: {
+                            pixKey: true,
+                            user: {
+                                select: {
+                                    name: true,
+                                    phoneNumber: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });            
+            
+            if (!parkingSpace) {
+				throw new ReservationError("parking space does not exists")
+			}
+
+            const processedParkingSpace = {
+                ...parkingSpace,
+                owner: {
+                    pixKey: parkingSpace.owner?.pixKey,
+                    ...parkingSpace.owner?.user,
+                },
+            };
+
+            return processedParkingSpace;
 
         } catch (error) {
             console.log(error);
@@ -216,6 +296,7 @@ export class ReservationService {
         }
 
     }
+
     async updateReservationDate({ userId, reservationId, endDate, endTime }: ParamsUpdateDate) {
 
         try {
@@ -241,8 +322,8 @@ export class ReservationService {
             const checkReservationAvailability = new CheckReservationAvailability();
 
             const isUpdateValid = await checkReservationAvailability.checkUpdateAvailability({ reservationId, endDate, endTime });
-            if (!isUpdateValid) {
-                throw new ReservationError("new end date has conflict with other reservation")
+            if (isUpdateValid != true) {
+                throw new ReservationError(isUpdateValid);
             }
 
             const isUpdateDateValid = await checkReservationAvailability.checkUpdateDateStatus({ reservationId, endDate, endTime });
@@ -256,6 +337,28 @@ export class ReservationService {
                 throw new ReservationError("new end date is the same");
             }
 
+            const parkingSpace = await prisma.parkingSpace.findUnique({
+                where: {
+                    id: reservation.parkingSpaceId
+                },
+                select: {
+                    pricePerHour: true,
+                },
+            });
+
+            if (!parkingSpace) {
+                throw new ReservationError("parking space does not exist");
+            }
+
+            const price = calculateReservationPrice({
+                startDate: reservation.startDate,
+                startTime: reservation.startTime,
+                endDate,
+                endTime,
+                parkingSpacePrice: parkingSpace.pricePerHour,
+            });
+
+
             const updatedReservation = prisma.reservation.update({
                 where: {
                     id: reservationId
@@ -263,6 +366,7 @@ export class ReservationService {
                 data: {
                     endTime,
                     endDate,
+                    price,
                     paymentStatus: ReservationPaymentStatus.Pendente
                 }
             });
@@ -275,4 +379,5 @@ export class ReservationService {
         }
 
     }
+
 }

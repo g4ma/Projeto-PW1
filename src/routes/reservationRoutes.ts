@@ -9,6 +9,7 @@ const reservationController = new ReservationController();
 routesReservation.post("/reservations", checkLogin, reservationController.create);
 routesReservation.get("/reservations/user", checkLogin, reservationController.listAll);
 routesReservation.get("/reservations/owner", checkLogin, reservationController.listOwner);
+routesReservation.get("/reservations/:parkingSpaceId", checkLogin, reservationController.listParkingReservation);
 routesReservation.delete("/reservations/:reservationId", checkLogin, reservationController.delete);
 routesReservation.patch("/reservations/payment/:reservationId", checkLogin, isOwner, reservationController.updatePaymentStatus);
 routesReservation.patch("/reservations/date/:reservationId", checkLogin, reservationController.updateReservationDate);
