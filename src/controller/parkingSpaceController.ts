@@ -7,6 +7,7 @@ export class ParkingSpaceController {
 	async create(req: Request, res: Response) {
 		const ownerId = req.params.userId
 		const pictures = req.files as Express.Multer.File[]
+		console.log(req)
 
 		const { latitude, longitude, description, pricePerHour, type } = req.body
 		try {
@@ -55,7 +56,7 @@ export class ParkingSpaceController {
 		}
 	}
 
-	async isFromOwner(req: Request, res: Response){
+	async isFromOwner(req: Request, res: Response) {
 		return res.status(200).json(true)
 	}
 
