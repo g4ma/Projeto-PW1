@@ -78,6 +78,7 @@ URL	| Método | Descrição
 /reservations |	POST |	Recurso de criação de reserva de vaga de estacionamento, espera um json no corpo da requisição
 /reservations/user	| GET |	Recurso de exibição de dados de todas as reservas feitas pelo usuário
 /reservations/owner	| GET |	Recurso de exibição de dados de todas as reservas feitas das vagas de estacionamento cadastradas pelo usuário proprietário
+/reservations/:parkingSpaceId | GET | Recurso de exibição de dados de uma vaga de estacionamento e de seu proprietário para contato e pagamento
 /reservations/payment/:reservationId |	PATCH	| Recurso de atualização do status de pagamento de uma reserva pelo usuário proprietário, espera um json no corpo da requisição e recebe o id da reserva como parâmetro
 /reservations/date/:reservationId |	PATCH	| Recurso de atualização da data e horário final de uma reserva, espera um json no corpo da requisição e recebe o id da reserva como parâmetro
 /reservations/:reservationId	| DELETE |	Recurso de exclusão de reservas feitas pelo usuário que recebe um id como parâmetro
